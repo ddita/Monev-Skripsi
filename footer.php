@@ -1,21 +1,24 @@
 <?php
-$pglnama = mysqli_query($conn, "SELECT * FROM tbl_konfigurasi WHERE id=3") or die(mysqli_error($conn));
-        $arrnama = mysqli_fetch_assoc($pglnama);
-        $namaapp = $arrnama['elemen'];
+function getConfig($conn, $id) {
+  $q = mysqli_query($conn, "SELECT nilai_konfigurasi FROM tbl_konfigurasi WHERE id='$id'");
+  $d = mysqli_fetch_assoc($q);
+  return $d['nilai_konfigurasi'] ?? '';
+}
 
-        $pglcopy = mysqli_query($conn, "SELECT * FROM tbl_konfigurasi WHERE id=4") or die(mysqli_error($conn));
-        $arrcopy = mysqli_fetch_assoc($pglcopy);
-        $copyapp = $arrcopy['elemen'];
-
-        $pgluniv = mysqli_query($conn, "SELECT * FROM tbl_konfigurasi WHERE id=5") or die(mysqli_error($conn));
-        $arruniv = mysqli_fetch_assoc($pgluniv);
-        $univapp = $arruniv['elemen'];
+$namaapp = getConfig($conn, 1); // nama_aplikasi
+$univapp = getConfig($conn, 4); // nama_universitas
+$tahun   = date('Y');
 ?>
 
 <footer class="main-footer">
-    <strong>Copyright &copy; <?=$copyapp;?> <?php echo date ('Y'); ?> <?=$namaapp;?> <?=$univapp;?>.<a href="https://adminlte.io">Monitoring Evaluasi Skripsi</a>.</strong>
-    All rights reserved.
-    <div class="float-right d-none d-sm-inline-block">
-      <b>Version</b> 1.0
-    </div>
-  </footer>
+  <strong>
+    &copy; <?= $tahun; ?>
+    <?= htmlspecialchars($univapp); ?> – 
+    <?= htmlspecialchars($namaapp); ?>
+  </strong>
+  . All rights reserved.
+
+  <div class="float-right d-none d-sm-inline-block">
+    <b>Version</b> 1.0
+  </div>
+</footer>

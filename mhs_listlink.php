@@ -1,7 +1,7 @@
 <?php
 $pgllogotitle = mysqli_query($conn, "SELECT * FROM tbl_konfigurasi WHERE id=2") or die(mysqli_error($conn));
 $arrtitle = mysqli_fetch_array($pgllogotitle);
-$logotitle = $arrtitle['lokasi_file'];
+$logotitle = $arrtitle['nilai_konfigurasi'];
 ?>
 <!-- Google Font: Source Sans Pro -->
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback">
@@ -27,3 +27,4 @@ $logotitle = $arrtitle['lokasi_file'];
 <link rel="stylesheet" href="../assets_adminlte/plugins/datatables-bs4/css/dataTables.bootstrap4.min.css">
 <link rel="stylesheet" href="../assets_adminlte/plugins/datatables-responsive/css/responsive.bootstrap4.min.css">
 <link rel="stylesheet" href="../assets_adminlte/plugins/datatables-buttons/css/buttons.bootstrap4.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">

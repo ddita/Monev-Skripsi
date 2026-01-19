@@ -1,154 +1,221 @@
 <?php
 session_start();
 require_once '../database/config.php';
-$pgllogotitle = mysqli_query($conn, "SELECT * FROM tbl_konfigurasi WHERE id=2") or die(mysqli_error($conn));
-$arrtitle = mysqli_fetch_array($pgllogotitle);
-$logotitle = $arrtitle['lokasi_file'];
+
+/* =========================
+   AMBIL KONFIGURASI SISTEM
+========================= */
+$config = [];
+$qConfig = mysqli_query($conn, "SELECT * FROM tbl_konfigurasi");
+while ($row = mysqli_fetch_assoc($qConfig)) {
+  $config[$row['nama_konfigurasi']] = $row['nilai_konfigurasi'];
+}
+
+/* =========================
+   FALLBACK CONFIG
+========================= */
+$nama_aplikasi    = $config['nama_aplikasi'] ?? 'Monitoring Skripsi';
+$logo_aplikasi    = $config['logo_aplikasi'] ?? '../assets/image/UP.png';
+$favicon          = $config['favicon'] ?? '../assets/image/UP.png';
+$nama_universitas = $config['nama_universitas'] ?? 'Universitas';
+
+/* =========================
+   PROSES LOGIN
+========================= */
+if (isset($_POST['login'])) {
+
+  $username = mysqli_real_escape_string($conn, trim($_POST['username']));
+  $password = md5(trim($_POST['password'])); // sesuaikan DB
+
+  $query = mysqli_query($conn, "
+    SELECT * FROM tbl_users 
+    WHERE username='$username'
+      AND password='$password'
+      AND status='aktif'
+  ");
+
+  if (mysqli_num_rows($query) === 1) {
+
+    $user = mysqli_fetch_assoc($query);
+
+    $_SESSION['id_user']    = $user['id_user'];
+    $_SESSION['username']  = $user['username'];
+    $_SESSION['nama_user'] = $user['nama_lengkap'];
+    $_SESSION['role']      = $user['role'];
+
+    if ($user['role'] === 'admin') {
+      header("Location: ../admin_dashboard");
+    } elseif ($user['role'] === 'dosen') {
+      header("Location: ../dosen_dashboard");
+    } else {
+      header("Location: ../mhs_dashboard");
+    }
+    exit;
+  } else {
+    $_SESSION['error'] = "Username atau password salah!";
+  }
+}
 ?>
+
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id">
+
 <head>
   <meta charset="utf-8">
+  <title><?= $nama_aplikasi; ?> | Login</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Monitoring Skripsi | Log in</title>
 
-  <!-- Google Font: Source Sans Pro -->
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback">
+  <!-- Google Font -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Poppins:300,400,500,600&display=fallback">
   <!-- Font Awesome -->
   <link rel="stylesheet" href="../assets_adminlte/plugins/fontawesome-free/css/all.min.css">
-  <!-- icheck bootstrap -->
-  <link rel="stylesheet" href="../assets_adminlte/plugins/icheck-bootstrap/icheck-bootstrap.min.css">
-  <!-- Theme style -->
+  <!-- AdminLTE -->
   <link rel="stylesheet" href="../assets_adminlte/dist/css/adminlte.min.css">
-  <link rel="shortcut icon" href="<?=$logotitle;?>">
+
+  <!-- CUSTOM STYLE -->
+  <style>
+  body {
+    background: linear-gradient(
+      rgba(0,0,0,0.6),
+      rgba(0,0,0,0.6)
+    ), url("../assets/image/bg-login.jpg");
+    background-size: cover;
+    background-position: center;
+    font-family: 'Poppins', sans-serif;
+  }
+
+  /* LOGIN BOX LEBIH KECIL */
+  .login-box {
+    width: 350px;
+  }
+
+  .login-logo img {
+    width: 75px;
+    margin-bottom: 8px;
+  }
+
+  .login-logo h4 {
+    font-size: 18px;
+    font-weight: 500;
+  }
+
+  /* CARD TRANSPARAN */
+  .card {
+    border-radius: 15px;
+    background: rgba(255, 255, 255, 0.88);
+    backdrop-filter: blur(6px);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+  }
+
+  .login-card-body {
+    padding: 22px;
+  }
+
+  .login-box-msg {
+    font-weight: 500;
+    font-size: 14px;
+  }
+
+  .btn-primary {
+    border-radius: 25px;
+  }
+
+  .form-control {
+    border-radius: 20px;
+    height: 42px;
+    font-size: 14px;
+  }
+
+  .input-group-text {
+    border-radius: 0 20px 20px 0;
+  }
+</style>
+
+
+  <link rel="shortcut icon" href="<?= $favicon; ?>">
 </head>
+
 <body class="hold-transition login-page">
+
   <div class="login-box">
-    <div class="login-logo">
-      <center>
-        <?php
-        $pgllogoapp = mysqli_query($conn, "SELECT lokasi_file FROM tbl_konfigurasi WHERE id=1") or die(mysqli_error($conn));
-        $arrlogo = mysqli_fetch_array($pgllogoapp);
-        $logoapp = $arrlogo['lokasi_file'];
 
-        $pglnama = mysqli_query($conn, "SELECT * FROM tbl_konfigurasi WHERE id=3") or die(mysqli_error($conn));
-        $arrnama = mysqli_fetch_assoc($pglnama);
-        $namaapp = $arrnama['elemen'];
+    <!-- LOGO -->
+    <div class="login-logo text-white">
+      <img src="<?= $logo_aplikasi; ?>" alt="Logo">
+      <h4><?= $nama_aplikasi; ?></h4>
+    </div>
 
-        $pglcopy = mysqli_query($conn, "SELECT * FROM tbl_konfigurasi WHERE id=4") or die(mysqli_error($conn));
-        $arrcopy = mysqli_fetch_assoc($pglcopy);
-        $copyapp = $arrcopy['elemen'];
+    <!-- CARD -->
+    <div class="card">
+      <div class="card-body login-card-body">
 
-        $pgluniv = mysqli_query($conn, "SELECT * FROM tbl_konfigurasi WHERE id=5") or die(mysqli_error($conn));
-        $arruniv = mysqli_fetch_assoc($pgluniv);
-        $univapp = $arruniv['elemen'];
-        ?>
-        <img src="<?=$logoapp;?>" height="100px" width="100px">
-      </center>
-      <a href="../login"><b><?=$namaapp;?></b></a>
-      </div>
-      <!-- /.login-logo -->
-      <div class="card">
-        <div class="card-body login-card-body">
+        <p class="login-box-msg">Silakan login untuk melanjutkan</p>
 
-          <form action="" method="post">
-            <div class="input-group mb-3">
-              <input type="text" class="form-control" placeholder="NIM/NIDN" name="username">
-              <div class="input-group-append">
-                <div class="input-group-text">
-                  <span class="fas fa-user-circle"></span>
-                </div>
-              </div>
-            </div>
-            <div class="input-group mb-3">
-              <input type="password" class="form-control" placeholder="Password" name="pass">
-              <div class="input-group-append">
-                <div class="input-group-text">
-                  <span class="fas fa-lock"></span>
-                </div>
-              </div>
-            </div>
-            <div class="row">
-              <div class="col-6">
-                <a href="#" class="btn btn-block btn-danger">
-                  <i class="nav-icon fas fa-question-circle"></i> Lupa Password
-                </a>
-              </div>
-              <!-- /.col -->
-              <div class="col-6">
-                <button type="submit" class="btn btn-primary btn-block" name="login">Log In <i class="nav-icon fas fa-sign-out-alt"></i></button>
-              </div>
-              <!-- /.col -->
-            </div>
-          </form>
-          <?php
-          //tangkap trigger button login
-          if(isset($conn, $_POST['login'])) {
-            //menyimpan value pada elemen username dan pass kedalam variabel $user dan $pwd
-            $user = trim(mysqli_real_escape_string($conn, $_POST['username']));
-            $pwd = sha1(trim(mysqli_real_escape_string($conn, $_POST['pass'])));
-            //cek user pada database
-            $querycek = mysqli_query($conn, "SELECT * FROM tbl_pengguna WHERE username='$user' AND password='$pwd'") or die(mysqli_error($conn));
-
-            //cek apakah ada value yang dikembalikan oleh query, jika value = 1 maka terdapat user seperti value elemen yang diinput user, jika 0 sebaliknya
-            $rv = mysqli_num_rows($querycek);
-
-            //buat percabangan
-            if ($rv == 1) {
-              //jika hasil $rv = 1 (ada user yang dimaksud)
-
-              //buat variabel untuk menampung array value dari querycek
-              $array = mysqli_fetch_assoc($querycek);
-              //buat variabel untuk menampung nilai tertentu dari array yang diambil lewat query
-              $st_user = $array['status'];
-
-              //buat nested if (percabangan didalam percabangan)
-              if ($st_user==0) {
-                $_SESSION['username'] = $user;
-                $_SESSION['nama_user'] = $array['nama_user'];
-                $_SESSION['status'] = $st_user;
-
-                echo '<script>window.location="../admin_dashboard"</script>';
-              }
-              elseif ($st_user==1) {
-                $_SESSION['username'] = $user;
-                $_SESSION['nama_user'] = $array['nama_user'];
-                $_SESSION['status'] = $st_user;
-
-                echo '<script>window.location="../dosen_dashboard"</script>';
-              }
-              elseif ($st_user==2) {
-                $_SESSION['username'] = $user;
-                $_SESSION['nama_user'] = $array['nama_user'];
-                $_SESSION['status'] = $st_user;
-
-                echo '<script>window.location="../mhs_dashboard"</script>';
-              }
-            }
-            else {
-              //jika hasil $rv = 0 (tidak ada user yang dimaksud)
-              session_destroy();
-              echo '<script>window.location="../gagal_login"</script>';
-            }
-          }
-          ?>
-          <div>
-            <br>
-            <center>
-              copyright &copy; <?=$copyapp;?> <br> <b> <?=$univapp;?> </b> <br> <?php echo date ('Y'); ?>
-            </center>
+        <!-- ERROR -->
+        <?php if (isset($_SESSION['error'])) { ?>
+          <div class="alert alert-danger text-center">
+            <?= $_SESSION['error'];
+            unset($_SESSION['error']); ?>
           </div>
-        </div>
-        <!-- /.login-card-body -->
+        <?php } ?>
+
+        <!-- FORM -->
+        <form method="post">
+
+          <div class="input-group mb-3">
+            <input type="text" name="username" class="form-control" placeholder="Username" required>
+            <div class="input-group-append">
+              <div class="input-group-text">
+                <span class="fas fa-user"></span>
+              </div>
+            </div>
+          </div>
+
+          <div class="input-group mb-3">
+            <input type="password" name="password" class="form-control" placeholder="Password" required>
+            <div class="input-group-append">
+              <div class="input-group-text">
+                <span class="fas fa-lock"></span>
+              </div>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-6">
+              <a href="#" class="btn btn-outline-secondary btn-block">
+                <i class="fas fa-question-circle"></i> Lupa
+              </a>
+            </div>
+            <div class="col-6">
+              <button type="submit" name="login" class="btn btn-primary btn-block">
+                Login <i class="fas fa-sign-in-alt"></i>
+              </button>
+            </div>
+          </div>
+        </form>
+
+        <hr>
+
+        <!-- ILLUSTRATION -->
+        <!-- <div class="text-center">
+          <img src="../assets/image/illustration-login.jpg" width="120" class="mt-2">
+        </div> -->
+
+        <!-- FOOTER -->
+        <p class="text-center mt-3 text-muted">
+          &copy; <?= date('Y'); ?><br>
+          <b><?= $nama_universitas; ?></b>
+        </p>
+
       </div>
     </div>
-    <!-- /.login-box -->
+  </div>
 
-    <!-- jQuery -->
-    <script src="../assets_adminlte/plugins/jquery/jquery.min.js"></script>
-    <!-- Bootstrap 4 -->
-    <script src="../assets_adminlte/plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
-    <!-- AdminLTE App -->
-    <script src="../assets_adminlte/dist/js/adminlte.min.js"></script>
-  </body>
-  </html>
+  <!-- Scripts -->
+  <script src="../assets_adminlte/plugins/jquery/jquery.min.js"></script>
+  <script src="../assets_adminlte/plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
+  <script src="../assets_adminlte/dist/js/adminlte.min.js"></script>
+
+</body>
+
+</html>

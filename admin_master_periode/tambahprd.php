@@ -2,27 +2,37 @@
 session_start();
 $konstruktor = 'admin_master_periode';
 require_once '../database/config.php';
-if ($_SESSION['status']!=0) {
-  $usr = $_SESSION['username'];
-  $waktu = date('Y-m-d H:i:s');
-  $auth = $_SESSION['status'];
-  $nama = $_SESSION['nama_user'];
-  if ($auth==1) {
-    $tersangka = "Dosen";
-  }
-  if ($auth==2) {
-    $tersangka = "Mahasiswa";
-  }
-  
-  $ket = "Pengguna dengan username ".$usr.", nama : ".$nama." melakukan cross authority dengan akses sebagai ".$tersangka;
-  $querycrossauth = mysqli_query($conn, "INSERT INTO tbl_cross_auth VALUES ('', '$usr', '$waktu', '$ket')") or die(mysqli_error($conn));
-  echo '<script>window.location="../login/logout.php"</script>';
+if ($_SESSION['role'] !== 'admin') {
 
-}
-else {
-  ?>
+  $usr   = $_SESSION['username'] ?? '-';
+  $nama  = $_SESSION['nama_user'] ?? '-';
+  $role  = $_SESSION['role'] ?? '-';
+  $waktu = date('Y-m-d H:i:s');
+
+  // ROLE TERDETEKSI
+  if ($role == 'dosen') {
+    $tersangka = "Dosen";
+  } elseif ($role == 'mahasiswa') {
+    $tersangka = "Mahasiswa";
+  } else {
+    $tersangka = "Tidak diketahui";
+  }
+
+  $ket = "Pengguna dengan username $usr, nama: $nama melakukan cross authority dengan akses sebagai $tersangka";
+
+  mysqli_query(
+    $conn,
+    "INSERT INTO tbl_cross_auth (username, waktu, keterangan)
+     VALUES ('$usr', '$waktu', '$ket')"
+  );
+
+  header("Location: ../login/logout.php");
+  exit;
+} else {
+?>
   <!DOCTYPE html>
   <html lang="en">
+
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -31,6 +41,7 @@ else {
     include '../mhs_listlink.php';
     ?>
   </head>
+
   <body class="hold-transition sidebar-mini layout-fixed">
     <div class="wrapper">
 
@@ -80,7 +91,7 @@ else {
               </div><!-- /.col -->
               <div class="col-sm-6">
                 <ol class="breadcrumb float-sm-right">
-                  <li class="breadcrumb-item"><a href="#">Dashboard Periode Akademik</a></li>
+                  <li class="breadcrumb-item"><a href="#">Periode Akademik</a></li>
                   <li class="breadcrumb-item active">Tambah Periode Akademik</li>
                 </ol>
               </div><!-- /.col -->
@@ -102,51 +113,96 @@ else {
                     <h3 class="card-title"><i class="nav-icon fas fa-calendar"></i> Tambah Periode Akademik</h3>
                   </div>
                   <!-- /.card-header -->
-                  <!-- form start -->
+                  <!-- FORM TAMBAH PERIODE -->
                   <form action="prosestambah.php" method="post">
                     <div class="card-body">
-                      <a href="../admin_master_periode" class="btn btn-warning btn-sm"><i class="nav-icon fas fa-chevron-left"></i> Kembali</a>
-                      <div class="form-group">
-                        <label for="kode_periode">Kode Periode</label>
-                        <input type="text" class="form-control" id="kode_periode" name="kode_periode" maxlength="50" onkeypress="return IsNumeric(event);" placeholder="Input Kode Periode Akademik" autofocus required>
-                      </div>
-                      <div class="form-group">
-                        <label for="nama">Periode</label>
-                        <input type="text" class="form-control" id="periode" name="periode" maxlength="20" placeholder="Input Periode Akademik">
-                      </div>
-                    </div>
-                  </div>
-                    <!-- /.card-body -->
 
-                    <div class="card-footer">
-                      <button type="submit" class="btn btn-primary btn-block" name="tambahprd"><i class="nav-icon fas fa-plus"></i> Tambah Periode Akademik</button>
+                      <a href="../admin_master_periode" class="btn btn-warning btn-sm mb-3">
+                        <i class="fas fa-chevron-left"></i> Kembali
+                      </a>
+
+                      <!-- ID PERIODE -->
+                      <div class="form-group">
+                        <label for="id_periode">ID Periode</label>
+                        <input type="text"
+                          class="form-control"
+                          id="id_periode"
+                          name="id_periode"
+                          maxlength="10"
+                          placeholder="Contoh: 20251"
+                          required>
+                        <small class="text-muted">
+                          Contoh: 20251 (Tahun 2025 Semester Ganjil)
+                        </small>
+                      </div>
+
+                      <!-- NAMA PERIODE -->
+                      <div class="form-group">
+                        <label for="nama_periode">Nama Periode</label>
+                        <input type="text"
+                          class="form-control"
+                          id="nama_periode"
+                          name="nama_periode"
+                          maxlength="30"
+                          placeholder="Contoh: Periode Genap 2025"
+                          required>
+                      </div>
+
+                      <!-- TAHUN AKADEMIK -->
+                      <div class="form-group">
+                        <label for="tahun_akademik">Tahun Akademik</label>
+                        <input type="text"
+                          class="form-control"
+                          id="tahun_akademik"
+                          name="tahun_akademik"
+                          maxlength="9"
+                          placeholder="Contoh: 2025/2026"
+                          required>
+                      </div>
+
+                      <!-- SEMESTER -->
+                      <div class="form-group">
+                        <label for="semester">Semester</label>
+                        <select class="form-control" id="semester" name="semester" required>
+                          <option value="">-- Pilih Semester --</option>
+                          <option value="Ganjil">Ganjil</option>
+                          <option value="Genap">Genap</option>
+                        </select>
+                      </div>
                     </div>
-                  </form>
                 </div>
-                <!-- /.card -->
-              </div>
-            </div>
-            <!-- /.row (main row) -->
-          </div><!-- /.container-fluid -->
-        </section>
-        <!-- /.content -->
-      </div>
-      <!-- /.content-wrapper -->
-      <?php
-      include '../footer.php';
-      ?>
+                <!-- /.card-body -->
 
-      <!-- Control Sidebar -->
-      <aside class="control-sidebar control-sidebar-dark">
-        <!-- Control sidebar content goes here -->
-      </aside>
-      <!-- /.control-sidebar -->
+                <div class="card-footer">
+                  <button type="submit" class="btn btn-primary btn-block" name="tambahprd"><i class="nav-icon fas fa-plus"></i> Tambah Periode Akademik</button>
+                </div>
+                </form>
+              </div>
+              <!-- /.card -->
+            </div>
+          </div>
+          <!-- /.row (main row) -->
+      </div><!-- /.container-fluid -->
+      </section>
+      <!-- /.content -->
+    </div>
+    <!-- /.content-wrapper -->
+    <?php
+    include '../footer.php';
+    ?>
+
+    <!-- Control Sidebar -->
+    <aside class="control-sidebar control-sidebar-dark">
+      <!-- Control sidebar content goes here -->
+    </aside>
+    <!-- /.control-sidebar -->
     </div>
     <!-- ./wrapper -->
-    <?php
-    include '../mhs_script.php';
-  }
+  <?php
+  include '../mhs_script.php';
+}
   ?>
 
-</body>
-</html>
+  </body>
+
+  </html>

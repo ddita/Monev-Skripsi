@@ -1,27 +1,66 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
+
 <head>
 	<meta charset="utf-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1">
-	<title>Proses Hapus Periode Akademik</title>
+	<title>Hapus Periode Akademik</title>
 </head>
+
 <body>
-<?php
-require_once '../database/config.php';
-session_start();
 
-$kode_periode = @$_GET['kd_prd'];
-$de_kdperiode = decriptData($kode_periode);
+	<?php
+	session_start();
+	require_once '../database/config.php';
+	require_once '../helpers/crypto.php';
 
-$queryhapusprd = mysqli_query($conn, "DELETE FROM tbl_periode WHERE kode_periode='$de_kdperiode'") or die(mysqli_error($conn));
+	/* =========================
+   CEK ROLE ADMIN
+   ========================= */
+	if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'admin') {
+		header("Location: ../login/logout.php");
+		exit;
+	}
 
-?>
-<script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
-<script>
-	swal("Berhasil", "Periode Akademik dengan Kode : <?=$kode_periode;?> berhasil dihapus", "success");
-	setTimeout(function(){
-		window.location.href = "../admin_master_periode";
-	}, 1500);
-</script>
+	/* =========================
+   VALIDASI PARAMETER
+   ========================= */
+	if (!isset($_GET['kd_prd'])) {
+		echo "Parameter tidak valid";
+		exit;
+	}
+
+	$id_periode_enkrip = $_GET['kd_prd'];
+	$id_periode = decriptData($id_periode_enkrip);
+
+	if (!$id_periode) {
+		echo "Data tidak valid";
+		exit;
+	}
+
+	/* =========================
+   PROSES HAPUS
+   ========================= */
+	$query = mysqli_query(
+		$conn,
+		"DELETE FROM tbl_periode WHERE id_periode='$id_periode'"
+	);
+
+	?>
+
+	<script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+	<script>
+		swal({
+			title: "Berhasil",
+			text: "Periode Akademik berhasil dihapus",
+			icon: "success",
+			button: false
+		});
+
+		setTimeout(function() {
+			window.location.href = "../admin_master_periode";
+		}, 1500);
+	</script>
+
 </body>
+
 </html>

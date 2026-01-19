@@ -3,17 +3,17 @@
 <head>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
-	<title>Proses Reset Data Periode Akademik</title>
+	<title>Reset Data Periode Akademik</title>
 </head>
 <body>
 <?php
 require_once '../database/config.php';
 session_start();
 
-$ambilkodeperiode = mysqli_query($conn, "SELECT kode_periode FROM tbl_periode") or die(mysqli_error($conn));
-$rvambilkodeperiode = mysqli_num_rows($ambilkodeperiode);
+$ambilidperiode = mysqli_query($conn, "SELECT id_periode FROM tbl_periode") or die(mysqli_error($conn));
+$rvambilidperiode = mysqli_num_rows($ambilidperiode);
 
-if($rvambilkodeperiode==0){
+if($rvambilidperiode==0){
 	?>
 	<script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
 	<script>
@@ -24,8 +24,8 @@ if($rvambilkodeperiode==0){
 	</script>
 	<?php
 } else {
-	while($data=mysqli_fetch_assoc($ambilkodeperiode)){
-		$kode_periode = $data['kode_periode'];
+	while($data=mysqli_fetch_assoc($ambilidperiode)){
+		$id_periode = $data['id_periode'];
 	}
 	$queryhapus_prd = mysqli_query($conn, "TRUNCATE TABLE tbl_periode") or die(mysqli_error($conn));
 }
