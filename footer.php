@@ -10,7 +10,7 @@ $univapp = getConfig($conn, 4); // nama_universitas
 $tahun   = date('Y');
 ?>
 
-<footer class="main-footer">
+<footer class="main-footer text-center">
   <strong>
     &copy; <?= $tahun; ?>
     <?= htmlspecialchars($univapp); ?> – 

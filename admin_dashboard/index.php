@@ -3,7 +3,7 @@ session_start();
 $konstruktor = 'admin_dashboard';
 require_once '../database/config.php';
 
-// CEK LOGIN
+/* ================= CEK LOGIN ================= */
 if (!isset($_SESSION['role'])) {
   header("Location: ../login/logout.php");
   exit;
@@ -30,8 +30,7 @@ if ($_SESSION['role'] !== 'admin') {
 
   mysqli_query(
     $conn,
-    "INSERT INTO tbl_cross_auth (username, waktu, keterangan)
-     VALUES ('$usr', '$waktu', '$ket')"
+    "INSERT INTO tbl_cross_auth (username, waktu, keterangan) VALUES ('$usr', '$waktu', '$ket')"
   );
 
   header("Location: ../login/logout.php");
@@ -89,59 +88,53 @@ function statusBadge($status)
 }
 ?>
 
-<style>
-  /* Hilangkan gap navbar ke konten */
-  body.layout-navbar-fixed .content-wrapper {
-    margin-top: 0 !important;
-    padding-top: 0 !important;
-  }
+<?php
+/* ================= PROGRES CHART ================= */
+$qProgres = mysqli_query($conn, "SELECT status_skripsi, COUNT(*) total FROM tbl_skripsi GROUP BY status_skripsi");
 
-  /* Rapikan header dashboard */
-  .content-header {
-    padding-top: 6px !important;
-    padding-bottom: 0 !important;
-    margin-bottom: 0 !important;
-  }
-</style>
+$labelProgres = [];
+$dataProgres  = [];
+while ($p = mysqli_fetch_assoc($qProgres)) {
+  $labelProgres[] = ucfirst(str_replace('_', ' ', $p['status_skripsi']));
+  $dataProgres[]  = $p['total'];
+}
 
+/* ================= KETERLAMBATAN ================= */
+$total_terlambat = mysqli_fetch_assoc(mysqli_query($conn, "SELECT COUNT(*) total FROM tbl_skripsi WHERE DATEDIFF(NOW(), updated_at) > 14"))['total'];
 
+/* ================= RATA-RATA PENYELESAIAN ================= */
+$qRata = mysqli_query($conn, "SELECT AVG(DATEDIFF(updated_at, created_at)) rata_hari FROM tbl_skripsi WHERE status_skripsi='lulus'");
+
+$dataRata  = mysqli_fetch_assoc($qRata);
+$rata_hari = round($dataRata['rata_hari'] ?? 0);
+?>
 
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id">
 
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Monev Skripsi | Administrator</title>
+  <title>Monev Skripsi | Admin</title>
   <?php include '../mhs_listlink.php'; ?>
+  <script>
+    (function() {
+      const theme = localStorage.getItem("theme") || "dark";
+      document.documentElement.classList.add(theme + "-mode");
+    })();
+  </script>
 </head>
 
-<script>
-  document.addEventListener("DOMContentLoaded", function() {
-    var tooltipTriggerList = [].slice.call(
-      document.querySelectorAll('[data-bs-toggle="tooltip"]')
-    );
-    tooltipTriggerList.map(function(tooltipTriggerEl) {
-      return new bootstrap.Tooltip(tooltipTriggerEl);
-    });
-  });
-</script>
+<body class="hold-transition sidebar-mini layout-fixed layout-navbar-fixed">
 
-
-<body class="hold-transition sidebar-mini layout-fixed">
   <div class="wrapper">
     <?php include '../mhs_navbar.php'; ?>
-    <aside class="main-sidebar sidebar-dark-primary elevation-4">
-      <a href="#" class="brand-link">
-        <img src="../images/profile.png" class="brand-image img-circle elevation-3">
-        <span class="brand-text font-weight-light">Monev Skripsi</span>
-      </a>
-      <div class="sidebar">
-        <nav class="mt-2">
-          <?php include '../admin_sidebar.php'; ?>
-        </nav>
-      </div>
-    </aside>
+    <?php include '../admin_sidebar.php'; ?>
+    <!-- Preloader -->
+    <div class="preloader flex-column justify-content-center align-items-center">
+      <img class="animation__shake" src="../images/UP.png" alt="Monev-Skripsi" height="60" width="60">
+    </div>
+
     <div class="content-wrapper">
       <!-- HEADER -->
       <section class="content-header pb-0">
@@ -157,49 +150,117 @@ function statusBadge($status)
         </div>
       </section>
 
+      <?php if ($total_terlambat > 0): ?>
+        <div class="alert alert-danger alert-dismissible fade show">
+          <i class="fas fa-bell"></i>
+          <b>Perhatian!</b> Ada <?= $total_terlambat; ?> mahasiswa tidak update progres > 14 hari.
+          <button type="button" class="close" data-dismiss="alert">&times;</button>
+        </div>
+      <?php endif; ?>
+
       <!-- CONTENT -->
       <section class="content">
         <div class="container-fluid">
+          <!-- ================= CHART + METRIK ================= -->
+          <div class="row align-items-stretch">
 
-          <!-- INFO BOX -->
-          <div class="row">
-            <div class="col-lg-3 col-6">
-              <div class="small-box bg-info">
+            <!-- CHART -->
+            <div class="col-md-8 d-flex">
+              <div class="card flex-fill">
+                <div class="card-header card-header-gradient">
+                  <h3 class="card-title">
+                    <i class="fas fa-chart-pie"></i> Progres Skripsi
+                  </h3>
+                </div>
+                <div class="card-body">
+                  <div style="height:200px;">
+                    <canvas id="grafikProgres"></canvas>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- SIDEBAR METRIK -->
+            <div class="col-md-4 d-flex">
+              <div class="w-100 d-flex flex-column gap-2">
+
+                <div class="info-box bg-danger">
+                  <span class="info-box-icon">
+                    <i class="fas fa-exclamation-triangle"></i>
+                  </span>
+                  <div class="info-box-content">
+                    <span class="info-box-text">Mahasiswa Terlambat</span>
+                    <span class="info-box-number"><?= $total_terlambat; ?></span>
+                    <small>> 14 hari</small>
+                  </div>
+                </div>
+
+                <div class="info-box bg-info">
+                  <span class="info-box-icon">
+                    <i class="fas fa-stopwatch"></i>
+                  </span>
+                  <div class="info-box-content">
+                    <span class="info-box-text">Rata-rata Penyelesaian</span>
+                    <span class="info-box-number"><?= $rata_hari; ?> Hari</span>
+                    <small>Skripsi Lulus</small>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+          </div>
+
+          <!-- ================= INFO BOX ================= -->
+          <div class="row info-box-row">
+            <!-- TOTAL MAHASISWA -->
+            <div class="col-lg-3 col-md-6">
+              <div class="small-box bg-gradient-blue">
                 <div class="inner">
                   <h3><?= $total_mhs; ?></h3>
                   <p>Total Mahasiswa</p>
                 </div>
-                <div class="icon"><i class="fas fa-users"></i></div>
+                <div class="icon">
+                  <i class="fas fa-users"></i>
+                </div>
               </div>
             </div>
 
-            <div class="col-lg-3 col-6">
-              <div class="small-box bg-success">
+            <!-- TOTAL DOSEN -->
+            <div class="col-lg-3 col-md-6">
+              <div class="small-box bg-gradient-navy">
                 <div class="inner">
                   <h3><?= $total_dsn; ?></h3>
                   <p>Total Dosen</p>
                 </div>
-                <div class="icon"><i class="fas fa-user-tie"></i></div>
+                <div class="icon">
+                  <i class="fas fa-user-tie"></i>
+                </div>
               </div>
             </div>
 
-            <div class="col-lg-3 col-6">
-              <div class="small-box bg-warning">
+            <!-- AKTIF SKRIPSI -->
+            <div class="col-lg-3 col-md-6">
+              <div class="small-box bg-gradient-orange">
                 <div class="inner">
                   <h3><?= $aktif; ?></h3>
-                  <p>Mahasiswa Aktif Skripsi</p>
+                  <p>Aktif Skripsi</p>
                 </div>
-                <div class="icon"><i class="fas fa-book"></i></div>
+                <div class="icon">
+                  <i class="fas fa-book"></i>
+                </div>
               </div>
             </div>
 
-            <div class="col-lg-3 col-6">
-              <div class="small-box bg-danger">
+            <!-- SIAP SIDANG -->
+            <div class="col-lg-3 col-md-6">
+              <div class="small-box bg-gradient-blue">
                 <div class="inner">
                   <h3><?= $siap_sidang; ?></h3>
                   <p>Siap Sidang</p>
                 </div>
-                <div class="icon"><i class="fas fa-graduation-cap"></i></div>
+                <div class="icon">
+                  <i class="fas fa-graduation-cap"></i>
+                </div>
               </div>
             </div>
           </div>
@@ -212,82 +273,85 @@ function statusBadge($status)
 
           <!-- AKTIVITAS -->
           <div class="card">
-            <div class="card-header bg-primary">
-              <h3 class="card-title">Aktivitas Skripsi Terakhir</h3>
+            <div class="card-header border-0 card-header-gradient">
+              <h3 class="card-title">
+                <i class="fas fa-history mr-1"></i> Aktivitas Terakhir
+              </h3>
             </div>
-            <div class="card-body">
-              <table class="table table-bordered">
+
+            <div class="card-body table-responsive p-0">
+              <table class="table table-hover">
                 <thead>
                   <tr>
-                    <th>Username</th>
-                    <th>Judul</th>
-                    <th>Status</th>
-                    <th>Update</th>
+                    <th class="text-center">Mahasiswa</th>
+                    <th class="text-center">Judul</th>
+                    <th class="text-center">Status</th>
+                    <th class="text-center">Update</th>
                   </tr>
                 </thead>
-                <tbody>
-                  <?php if (mysqli_num_rows($qAktivitas) > 0): ?>
-                    <?php while ($row = mysqli_fetch_assoc($qAktivitas)): ?>
 
-                      <?php
-                      // highlight jika >14 hari tidak update
-                      $rowClass = ($row['selisih_hari'] > 14) ? 'table-danger' : '';
-                      ?>
+                <?php if (mysqli_num_rows($qAktivitas) > 0): ?>
+                  <?php while ($row = mysqli_fetch_assoc($qAktivitas)): ?>
 
-                      <tr class="<?= $rowClass ?>">
-                        <!-- USERNAME -->
-                        <td>
-                          <a href="detail_skripsi.php?id=<?= $row['id_skripsi']; ?>"
-                            class="fw-bold text-decoration-none"
-                            data-bs-toggle="tooltip"
-                            title="Lihat detail skripsi">
-                            <i class="fas fa-user"></i>
-                            <?= htmlspecialchars($row['username']); ?>
-                          </a>
-                        </td>
+                    <?php
+                    // highlight jika >14 hari tidak update
+                    $rowClass = ($row['selisih_hari'] > 14) ? 'table-danger' : '';
+                    ?>
 
-                        <!-- JUDUL -->
-                        <td>
-                          <i class="fas fa-book text-secondary"></i>
-                          <?= strlen($row['judul']) > 40
-                            ? substr(htmlspecialchars($row['judul']), 0, 40) . '...'
-                            : htmlspecialchars($row['judul']); ?>
-                        </td>
+                    <tr class="<?= $rowClass ?>">
+                      <!-- USERNAME -->
+                      <td>
+                        <a href="detail_skripsi.php?id=<?= $row['id_skripsi']; ?>"
+                          class="fw-bold text-decoration-none"
+                          data-bs-toggle="tooltip"
+                          title="Lihat detail skripsi">
+                          <i class="fas fa-user"></i>
+                          <?= htmlspecialchars($row['username']); ?>
+                        </a>
+                      </td>
 
-                        <!-- STATUS -->
-                        <td>
-                          <?= statusBadge($row['status_skripsi']); ?>
-                        </td>
+                      <!-- JUDUL -->
+                      <td>
+                        <i class="fas fa-book text-secondary"></i>
+                        <?= strlen($row['judul']) > 40
+                          ? substr(htmlspecialchars($row['judul']), 0, 40) . '...'
+                          : htmlspecialchars($row['judul']); ?>
+                      </td>
 
-                        <!-- UPDATE -->
-                        <td>
-                          <i class="far fa-clock"></i>
-                          <?= date('d M Y H:i', strtotime($row['updated_at'])); ?>
+                      <!-- STATUS -->
+                      <td>
+                        <?= statusBadge($row['status_skripsi']); ?>
+                      </td>
 
-                          <?php if ($row['selisih_hari'] > 14): ?>
-                            <div class="text-danger small mt-1">
-                              <i class="fas fa-exclamation-triangle"></i>
-                              Tidak update <?= $row['selisih_hari']; ?> hari
-                            </div>
-                          <?php endif; ?>
-                        </td>
-                      </tr>
+                      <!-- UPDATE -->
+                      <td>
+                        <i class="far fa-clock"></i>
+                        <?= date('d M Y H:i', strtotime($row['updated_at'])); ?>
 
-                    <?php endwhile; ?>
-                  <?php else: ?>
-                    <tr>
-                      <td colspan="4" class="text-center text-muted">
-                        Belum ada aktivitas skripsi
+                        <?php if ($row['selisih_hari'] > 14): ?>
+                          <div class="text-danger small mt-1">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            Tidak update <?= $row['selisih_hari']; ?> hari
+                          </div>
+                        <?php endif; ?>
                       </td>
                     </tr>
-                  <?php endif; ?>
+
+                  <?php endwhile; ?>
+                <?php else: ?>
+                  <tr>
+                    <td colspan="4" class="text-center text-muted">
+                      Belum ada aktivitas skripsi
+                    </td>
+                  </tr>
+                <?php endif; ?>
                 </tbody>
               </table>
             </div>
           </div>
 
           <!-- REKOMENDASI -->
-          <div class="card card-success">
+          <div class="card card-navy">
             <div class="card-header">
               <h3 class="card-title">Rekomendasi Sistem</h3>
             </div>
@@ -305,10 +369,13 @@ function statusBadge($status)
       </section>
     </div>
 
-    <?php include '../footer.php'; ?>
-    <?php include '../mhs_script.php'; ?>
+  </div> <!-- /.content-wrapper -->
 
-  </div>
+  <?php include '../footer.php'; ?>
+  </div> <!-- /.wrapper -->
+
+  <?php include '../mhs_script.php'; ?>
+
 </body>
 
 </html>

@@ -1,0 +1,87 @@
+/* =====================================================
+   FORM THEME – LIGHT MODE
+===================================================== */
+html.light-mode .form-control,
+html.light-mode select.form-control,
+html.light-mode textarea {
+  background-color: #ffffff;
+  color: #212529;
+  border: 1px solid #ced4da;
+}
+
+html.light-mode .form-control:focus,
+html.light-mode select.form-control:focus,
+html.light-mode textarea:focus {
+  background-color: #ffffff;
+  color: #212529;
+  border-color: #007bff;
+  box-shadow: 0 0 0 0.1rem rgba(0, 123, 255, .25);
+}
+
+/* =====================================================
+   FORM THEME – DARK MODE (FIXED)
+===================================================== */
+html.dark-mode .form-control,
+html.dark-mode select.form-control,
+html.dark-mode textarea {
+  background-color: #2b2f3a !important;
+  color: #f8f9fa !important;
+  border: 1px solid #444;
+}
+
+/* ✅ FIX INPUT SAAT DIKETIK / FOCUS */
+html.dark-mode .form-control:focus,
+html.dark-mode select.form-control:focus,
+html.dark-mode textarea:focus {
+  background-color: #2b2f3a !important;
+  color: #ffffff !important;
+  border-color: #4dabf7;
+  box-shadow: 0 0 0 0.1rem rgba(77, 171, 247, .25);
+}
+
+/* Placeholder */
+html.dark-mode .form-control::placeholder {
+  color: #adb5bd;
+}
+
+/* =====================================================
+   LABEL & CARD
+===================================================== */
+html.dark-mode label {
+  color: #f1f1f1;
+}
+
+html.dark-mode .card {
+  background-color: #1f2230;
+  color: #f8f9fa;
+}
+
+html.dark-mode .card-header {
+  background-color: #262a38;
+  border-bottom: 1px solid #333;
+}
+
+/* =====================================================
+   SELECT OPTION FIX
+===================================================== */
+html.dark-mode select option {
+  background-color: #2b2f3a;
+  color: #ffffff;
+}
+
+.dark-mode input,
+.dark-mode select,
+.dark-mode textarea {
+  background-color: #343a40 !important;
+  color: #ffffff !important;
+  border-color: #6c757d;
+}
+
+.dark-mode input::placeholder {
+  color: #adb5bd;
+}
+
+.dark-mode select option {
+  background-color: #343a40;
+  color: #ffffff;
+}

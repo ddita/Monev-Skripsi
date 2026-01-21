@@ -1,0 +1,288 @@
+/* =====================================================
+   ROOT COLOR VARIABLES
+===================================================== */
+:root {
+  --gradient-navy: linear-gradient(135deg, #141E30, #35577D);
+  --gradient-dark-blue: linear-gradient(145deg, #242F49, #384358);
+  --gradient-dark-navy: linear-gradient(145deg, #242F49, #151E2F);
+  --gradient-orange-red: linear-gradient(145deg, #FFA586, #B51A2B);
+  --gradient-red-dark: linear-gradient(145deg, #B51A2B, #541A2E);
+
+  --text-light: #ffffff;
+  --text-dark: #212529;
+}
+
+/* =====================================================
+   FIX ADMINLTE MODE OVERRIDE
+===================================================== */
+.dark-mode .content-wrapper,
+.light-mode .content-wrapper {
+  background-color: transparent !important;
+}
+
+/* =====================================================
+   CARD HEADER GRADIENT (TIDAK BERUBAH MODE)
+===================================================== */
+.card-header-gradient {
+  background: var(--gradient-navy) !important;
+  color: var(--text-light) !important;
+  border-bottom: none;
+}
+
+.card-header-gradient .card-title,
+.card-header-gradient i {
+  color: var(--text-light) !important;
+}
+
+/* =====================================================
+   SMALL BOX GRADIENT
+===================================================== */
+.small-box {
+  color: var(--text-light) !important;
+  border-radius: 0.75rem;
+}
+
+.small-box h3,
+.small-box p,
+.small-box .icon {
+  color: var(--text-light) !important;
+}
+
+/* =====================================================
+   PRESET GRADIENT CLASSES
+===================================================== */
+.bg-gradient-blue {
+  background: var(--gradient-dark-blue) !important;
+}
+
+.bg-gradient-navy {
+  background: var(--gradient-dark-navy) !important;
+}
+
+.bg-gradient-orange {
+  background: var(--gradient-orange-red) !important;
+}
+
+.bg-gradient-red {
+  background: var(--gradient-red-dark) !important;
+}
+
+/* =====================================================
+   INFO BOX FIX (ADMINLTE OVERRIDE)
+===================================================== */
+.info-box {
+  border-radius: 0.75rem;
+}
+
+.info-box-icon {
+  background: rgba(255, 255, 255, 0.15) !important;
+  color: #fff !important;
+}
+
+/* =====================================================
+   TABLE & BADGE STABILITY
+===================================================== */
+.table td,
+.table th {
+  vertical-align: middle;
+}
+
+.badge {
+  font-size: 0.85rem;
+}
+
+/* =====================================================
+   DARK MODE SAFE FIX
+===================================================== */
+.dark-mode .card,
+.dark-mode .info-box,
+.dark-mode .small-box {
+  background-color: transparent !important;
+  box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.4);
+}
+
+/* =====================================================
+   LIGHT MODE SAFE FIX
+===================================================== */
+.light-mode .card {
+  box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.08);
+}
+
+/* =========================================================
+   ADMINLTE WRAPPER FIX
+========================================================= */
+.wrapper,
+.content-wrapper {
+  background: transparent !important;
+}
+
+/* =========================================================
+   CARD & BOX
+========================================================= */
+.card,
+.small-box {
+  background: var(--card-bg);
+  border-radius: 18px;
+  border: 1px solid var(--card-border);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.25);
+  color: var(--text-main);
+}
+
+.card-title {
+  font-weight: 600;
+}
+
+.text-muted {
+  color: var(--text-muted) !important;
+}
+
+/* =========================================================
+   CARD HEADER GRADIENT
+========================================================= */
+.card-header-gradient {
+  background: linear-gradient(135deg, var(--navy-dark), var(--navy));
+  color: #ffffff;
+  border-bottom: none;
+}
+
+.card-header-gradient .card-title {
+  color: #ffffff;
+}
+
+/* =========================================================
+   INFO BOX
+========================================================= */
+.small-box {
+  position: relative;
+  overflow: hidden;
+  padding: 20px;
+  min-height: 130px;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.small-box:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.4);
+}
+
+.small-box h3,
+.small-box p {
+  margin: 0;
+}
+
+.small-box h3 {
+  font-size: 2rem;
+  font-weight: 700;
+}
+
+.small-box .icon {
+  position: absolute;
+  right: 20px;
+  bottom: 15px;
+  font-size: 3.2rem;
+  color: var(--icon-color);
+  opacity: 0.4;
+  transition: transform 0.3s ease;
+}
+
+.small-box:hover .icon {
+  transform: scale(1.15);
+}
+
+/* =========================================================
+   NAVBAR & SIDEBAR
+========================================================= */
+.main-header.navbar,
+.main-sidebar {
+  background: var(--card-bg) !important;
+  border-bottom: none;
+}
+
+.main-header .nav-link {
+  color: var(--text-main) !important;
+  font-weight: 500;
+}
+
+.main-header .nav-link:hover {
+  color: var(--accent) !important;
+}
+
+/* =========================================================
+   TABLE
+========================================================= */
+.table {
+  color: var(--text-main);
+}
+
+.table thead th {
+  border-bottom: 1px solid var(--card-border);
+}
+
+.table-hover tbody tr:hover {
+  background-color: rgba(0, 0, 0, 0.03);
+}
+
+body.dark-mode .table-hover tbody tr:hover {
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
+/* =========================================================
+   ROW NONAKTIF
+========================================================= */
+.row-nonaktif {
+  opacity: 0.65;
+  background-color: rgba(108, 117, 125, 0.15) !important;
+}
+
+body.dark-mode .row-nonaktif {
+  background-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+.row-nonaktif:hover {
+  opacity: 0.85;
+}
+
+/* =========================================================
+   PRELOADER
+========================================================= */
+.preloader {
+  background: var(--bg-main) !important;
+  transition: opacity 0.4s ease, background 0.3s ease;
+}
+
+.preloader img {
+  filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.35));
+}
+
+body.dark-mode .preloader img {
+  filter: brightness(1.1);
+}
+
+body.light-mode .preloader img {
+  filter: brightness(0.9);
+}
+
+/* =========================================================
+   BADGE (STATUS)
+========================================================= */
+.badge {
+  font-weight: 500;
+}
+
+/* =========================================================
+   ANIMATION POLISH
+========================================================= */
+.card,
+.small-box,
+.nav-link {
+  transition: background 0.3s ease, color 0.3s ease, transform 0.3s ease;
+}
+
+/* FIX PRELOADER GLITCH */
+.dark-mode .preloader {
+  background-color: #151E2F !important;
+}
+
+.light-mode .preloader {
+  background-color: #f4f6f9 !important;
+}
