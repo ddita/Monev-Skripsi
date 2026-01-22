@@ -48,41 +48,50 @@ $qDsn = mysqli_query($conn, "SELECT COUNT(*) AS total FROM tbl_dosen");
 $total_dsn = mysqli_fetch_assoc($qDsn)['total'];
 
 // MAHASISWA AKTIF SKRIPSI
-$qAktif = mysqli_query($conn, "SELECT COUNT(*) AS total FROM tbl_skripsi WHERE status_skripsi = 'aktif'");
+$qAktif = mysqli_query($conn, "SELECT COUNT(*) total FROM tbl_skripsi s
+  JOIN tbl_status st ON st.id = s.status_skripsi WHERE LOWER(st.status) = 'bimbingan'");
 $aktif = mysqli_fetch_assoc($qAktif)['total'];
 
 // SIAP SIDANG
-$qSidang = mysqli_query($conn, "SELECT COUNT(*) AS total FROM tbl_skripsi WHERE status_skripsi = 'siap_sidang'");
+$qSidang = mysqli_query($conn, "SELECT COUNT(*) total FROM tbl_skripsi s
+  JOIN tbl_status st ON st.id = s.status_skripsi WHERE LOWER(st.status) = 'siap sidang'");
 $siap_sidang = mysqli_fetch_assoc($qSidang)['total'];
 ?>
 
 <?php
 function statusBadge($status)
 {
+  $status = strtolower(trim($status));
+
   switch ($status) {
-    case 'siap_sidang':
+    case 'siap sidang':
       return '<span class="badge bg-success">
-      <i class="fas fa-check-circle"></i> Siap Sidang
+        <i class="fas fa-check-circle"></i> Siap Sidang
       </span>';
 
-    case 'seminar':
+    case 'seminar proposal':
       return '<span class="badge bg-primary">
-      <i class="fas fa-chalkboard-teacher"></i> Seminar
+        <i class="fas fa-chalkboard-teacher"></i> Seminar Proposal
       </span>';
 
     case 'bimbingan':
       return '<span class="badge bg-warning">
-      <i class="fas fa-user-edit"></i> Bimbingan
+        <i class="fas fa-user-edit"></i> Bimbingan
       </span>';
 
     case 'revisi':
       return '<span class="badge bg-warning text-dark">
-      <i class="fas fa-sync-alt"></i> Revisi
+        <i class="fas fa-sync-alt"></i> Revisi
+      </span>';
+
+    case 'lulus':
+      return '<span class="badge bg-dark">
+        <i class="fas fa-graduation-cap"></i> Lulus
       </span>';
 
     default:
       return '<span class="badge bg-secondary">
-      <i class="fas fa-file-alt"></i> Draft
+        <i class="fas fa-file-alt"></i> Draft
       </span>';
   }
 }
@@ -90,12 +99,14 @@ function statusBadge($status)
 
 <?php
 /* ================= PROGRES CHART ================= */
-$qProgres = mysqli_query($conn, "SELECT status_skripsi, COUNT(*) total FROM tbl_skripsi GROUP BY status_skripsi");
+$qProgres = mysqli_query($conn, "SELECT st.status, COUNT(*) total FROM tbl_skripsi s
+  JOIN tbl_status st ON st.id = s.status_skripsi GROUP BY st.status");
 
 $labelProgres = [];
 $dataProgres  = [];
+
 while ($p = mysqli_fetch_assoc($qProgres)) {
-  $labelProgres[] = ucfirst(str_replace('_', ' ', $p['status_skripsi']));
+  $labelProgres[] = $p['status'];
   $dataProgres[]  = $p['total'];
 }
 
@@ -267,8 +278,9 @@ $rata_hari = round($dataRata['rata_hari'] ?? 0);
 
           <?php
           // AKTIVITAS SKRIPSI TERAKHIR
-          $qAktivitas = mysqli_query($conn, "SELECT id_skripsi, username, judul, status_skripsi, updated_at, DATEDIFF(NOW(), updated_at) AS selisih_hari
-          FROM tbl_skripsi ORDER BY updated_at DESC LIMIT 5");
+          $qAktivitas = mysqli_query($conn, "SELECT s.id_skripsi, s.username, s.judul, st.status AS status_skripsi, s.updated_at, DATEDIFF(NOW(), s.updated_at) AS selisih_hari FROM tbl_skripsi s
+            JOIN tbl_status st ON st.id = s.status_skripsi ORDER BY s.updated_at DESC
+            LIMIT 5");
           ?>
 
           <!-- AKTIVITAS -->

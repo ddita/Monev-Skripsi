@@ -17,11 +17,11 @@ if ($_SESSION['role'] !== 'admin') {
   $role  = $_SESSION['role'] ?? '-';
   $waktu = date('Y-m-d H:i:s');
 
-  $ket = "Pengguna $usr ($nama) mencoba akses Detail Mahasiswa sebagai $role";
+  $ket = "Pengguna $usr ($nama) mencoba akses Detail Skripsi sebagai $role";
 
   mysqli_query(
     $conn,
-    "INSERT INTO tbl_cross_auth (username,waktu,keterangan)
+    "INSERT INTO tbl_cross_auth (username, waktu, keterangan)
      VALUES ('$usr','$waktu','$ket')"
   );
 
@@ -29,239 +29,307 @@ if ($_SESSION['role'] !== 'admin') {
   exit;
 }
 
-/* ================= FUNGSI DEKRIP ================= */
-function decriptData($data)
+/* ================= AMBIL DATA ================= */
+$nim_encrypted = $_GET['nim'] ?? '';
+
+if (empty($nim_encrypted)) {
+  echo "<div style='padding:20px'>
+          <h4>Data tidak ditemukan</h4>
+          <p>NIM tidak dikirim.</p>
+        </div>";
+  exit;
+}
+
+function decryptData($data)
 {
-  $key = 'monev_skripsi_2024';
+  $key = 'monev_skripsi_2024'; // HARUS sama dengan enkripsi
+
   return openssl_decrypt(
     base64_decode(urldecode($data)),
     'AES-128-ECB',
     $key
   );
 }
+$nim = decryptData($nim_encrypted);
+$nim = mysqli_real_escape_string($conn, $nim);
 
-/* ================= VALIDASI PARAM ================= */
-if (!isset($_GET['nim'])) {
-  header("Location: index.php");
+if (empty($nim)) {
+  echo "<div style='padding:20px'>
+          <h4>Data tidak valid</h4>
+          <p>NIM gagal didekripsi.</p>
+        </div>";
   exit;
 }
 
-$nim_decrypt = decriptData($_GET['nim']);
-if (!$nim_decrypt) {
-  header("Location: index.php?err=invalid");
-  exit;
-}
-
-$nim = mysqli_real_escape_string($conn, $nim_decrypt);
-
-/* ================= QUERY DETAIL MAHASISWA ================= */
-$qMhs = mysqli_query($conn, "
-  SELECT 
-    m.nim, m.nama, m.aktif,
+$q = mysqli_query($conn, "SELECT 
+    m.nim,
+    m.nama,
+    m.aktif,
     p.nama_prodi,
     a.keterangan AS angkatan,
-    s.status AS status_skripsi,
-    d.nama_dosen
+    d.nama_dosen AS pembimbing,
+    s.id_skripsi,
+    s.judul,
+    s.created_at,
+    s.updated_at,
+    st.status,
+    pr.nama_periode,
+    pr.tahun_akademik,
+    pr.semester
   FROM tbl_mahasiswa m
   LEFT JOIN tbl_prodi p ON m.prodi = p.kode_prodi
   LEFT JOIN tbl_angkatan a ON m.angkatan = a.kode_angkatan
-  LEFT JOIN tbl_status s ON m.status_skripsi = s.id
   LEFT JOIN tbl_dosen d ON m.dosen_pembimbing = d.nip
-  WHERE m.nim='$nim'
+  LEFT JOIN tbl_skripsi s ON m.nim = s.username
+  LEFT JOIN tbl_status st ON s.status_skripsi = st.id
+  LEFT JOIN tbl_periode pr ON s.id_periode = pr.id_periode
+  WHERE m.nim = '$nim'
 ") or die(mysqli_error($conn));
 
-if (mysqli_num_rows($qMhs) === 0) {
-  header("Location: index.php?err=notfound");
+
+if (mysqli_num_rows($q) == 0) {
+  echo "<div style='padding:20px'>
+          <h4>Data tidak ditemukan</h4>
+          <p>Mahasiswa dengan NIM <b>$nim</b> tidak terdaftar.</p>
+        </div>";
   exit;
 }
 
-$mhs = mysqli_fetch_assoc($qMhs);
+$data = mysqli_fetch_assoc($q);
 
-/* ================= TIMELINE STATUS ================= */
-$qStatus = mysqli_query($conn, "
-  SELECT l.waktu, s.status, l.keterangan
-  FROM tbl_status_log l
-  JOIN tbl_status s ON l.status_id = s.id
-  WHERE l.nim='$nim'
-  ORDER BY l.waktu DESC
-");
-
-/* ================= TIMELINE BIMBINGAN ================= */
-$qBimbingan = mysqli_query($conn, "
-  SELECT tanggal, topik, catatan
-  FROM tbl_bimbingan
-  WHERE nim='$nim'
-  ORDER BY tanggal DESC
-");
+/* ================= PROGRESS ================= */
+$progressMap = [
+  'Diajukan'  => 20,
+  'Disetujui' => 40,
+  'Bimbingan' => 60,
+  'Seminar'   => 80,
+  'Sidang'    => 100
+];
+$progress = $progressMap[$data['status'] ?? ''] ?? 0;
 ?>
-
 <!DOCTYPE html>
 <html lang="id">
 
 <head>
   <meta charset="utf-8">
-  <title>Detail Mahasiswa | Monev Skripsi</title>
-  <?php include '../mhs_listlink.php'; ?>
+  <title>Detail Skripsi | Admin</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
 
+  <!-- Light / Dark Mode -->
   <script>
     (function() {
       const theme = localStorage.getItem("theme") || "dark";
       document.documentElement.classList.add(theme + "-mode");
     })();
   </script>
+  <?php include '../mhs_listlink.php'; ?>
 </head>
 
 <body class="hold-transition sidebar-mini layout-fixed layout-navbar-fixed">
-  <div class="wrapper">
 
+  <div class="wrapper">
     <?php include '../mhs_navbar.php'; ?>
     <?php include '../admin_sidebar.php'; ?>
-
     <!-- Preloader -->
     <div class="preloader flex-column justify-content-center align-items-center">
-      <img class="animation__shake" src="../images/UP.png" height="60">
+      <img class="animation__shake" src="../images/UP.png" alt="Monev-Skripsi" height="60" width="60">
     </div>
 
     <div class="content-wrapper">
-
-      <!-- HEADER -->
-      <section class="content-header">
+      <!-- CONTENT HEADER -->
+      <div class="content-header">
         <div class="container-fluid">
-          <h1>Detail Mahasiswa</h1>
+          <div class="row mb-2">
+            <div class="col-sm-6">
+              <h1 class="m-0">Detail & Timeline Skripsi</h1>
+            </div>
+            <div class="col-sm-6">
+              <ol class="breadcrumb float-sm-right">
+                <li class="breadcrumb-item"><a href="#">Dashboard Mahasiswa</a></li>
+                <li class="breadcrumb-item active">Detail Mahasiswa</li>
+              </ol>
+            </div>
+          </div>
         </div>
-      </section>
+      </div>
 
+      <!-- CONTENT -->
       <section class="content">
+        <a href="../admin_mahasiswa" class="btn btn-warning btn-sm mb-3">
+          <i class="nav-icon fas fa-chevron-left"></i> Kembali
+        </a>
         <div class="container-fluid">
-
-          <!-- INFO MAHASISWA -->
-          <div class="card">
-            <div class="card-header">
-              <h3 class="card-title">
-                <i class="fas fa-user-graduate"></i> Informasi Akademik
-              </h3>
-            </div>
-            <div class="card-body">
-              <table class="table table-sm table-bordered">
-                <tr>
-                  <th width="200">NIM</th>
-                  <td><?= $mhs['nim']; ?></td>
-                </tr>
-                <tr>
-                  <th>Nama</th>
-                  <td><?= htmlspecialchars($mhs['nama']); ?></td>
-                </tr>
-                <tr>
-                  <th>Program Studi</th>
-                  <td><?= $mhs['nama_prodi']; ?></td>
-                </tr>
-                <tr>
-                  <th>Angkatan</th>
-                  <td><?= $mhs['angkatan']; ?></td>
-                </tr>
-                <tr>
-                  <th>Status Aktif</th>
-                  <td>
-                    <?= $mhs['aktif']
-                      ? '<span class="badge badge-success">Aktif</span>'
-                      : '<span class="badge badge-secondary">Nonaktif</span>'; ?>
-                  </td>
-                </tr>
-                <tr>
-                  <th>Dosen Pembimbing</th>
-                  <td><?= $mhs['nama_dosen'] ?? '-'; ?></td>
-                </tr>
-                <tr>
-                  <th>Status Skripsi</th>
-                  <td><?= $mhs['status_skripsi'] ?? 'Draft'; ?></td>
-                </tr>
-              </table>
-            </div>
-          </div>
-
           <div class="row">
+            <!-- ================= KOLOM KIRI ================= -->
+            <div class="col-lg-6 col-md-12">
 
-            <!-- TIMELINE STATUS -->
-            <div class="col-md-6">
-              <div class="card">
+              <!-- DATA MAHASISWA -->
+              <div class="card card-primary">
                 <div class="card-header">
-                  <h3 class="card-title">
-                    <i class="fas fa-stream"></i> Timeline Status Skripsi
-                  </h3>
+                  <h3 class="card-title">Data Mahasiswa</h3>
                 </div>
                 <div class="card-body">
-                  <?php if (mysqli_num_rows($qStatus) > 0) { ?>
-                    <ul class="timeline">
-                      <?php while ($s = mysqli_fetch_assoc($qStatus)) { ?>
-                        <li>
-                          <i class="fas fa-flag bg-primary"></i>
-                          <div class="timeline-item">
-                            <span class="time">
-                              <i class="far fa-clock"></i>
-                              <?= date('d M Y H:i', strtotime($s['waktu'])); ?>
-                            </span>
-                            <h3 class="timeline-header">
-                              <?= $s['status']; ?>
-                            </h3>
-                            <div class="timeline-body">
-                              <?= $s['keterangan'] ?? '-'; ?>
-                            </div>
-                          </div>
-                        </li>
-                      <?php } ?>
-                    </ul>
-                  <?php } else { ?>
-                    <p class="text-muted">Belum ada riwayat status.</p>
-                  <?php } ?>
+                  <?php
+                  $badge = 'secondary';
+                  if ($data['status'] == 'Lulus') $badge = 'success';
+                  elseif ($data['status'] == 'Bimbingan') $badge = 'warning';
+                  elseif ($data['status'] == 'Seminar') $badge = 'info';
+                  ?>
+                  <span class="badge badge-<?= $badge ?>">
+                    <?= $data['status'] ?? 'Belum Mengajukan'; ?>
+                  </span>
+
+                  <table class="table table-sm table-borderless mt-2">
+                    <tr>
+                      <th>NIM</th>
+                      <td><?= $data['nim']; ?></td>
+                    </tr>
+                    <tr>
+                      <th>Nama</th>
+                      <td><?= $data['nama']; ?></td>
+                    </tr>
+                    <tr>
+                      <th>Prodi</th>
+                      <td><?= $data['nama_prodi']; ?></td>
+                    </tr>
+                    <tr>
+                      <th>Angkatan</th>
+                      <td><?= $data['angkatan']; ?></td>
+                    </tr>
+                    <tr>
+                      <th>Pembimbing</th>
+                      <td><?= $data['pembimbing'] ?? '-'; ?></td>
+                    </tr>
+                    <tr>
+                      <th>Status</th>
+                      <td>
+                        <span class="badge badge-info">
+                          <?= $data['status'] ?? 'Belum Mengajukan'; ?>
+                        </span>
+                      </td>
+                    </tr>
+                  </table>
+                </div>
+              </div>
+
+              <!-- INFORMASI SKRIPSI -->
+              <div class="card card-success">
+                <div class="card-header">
+                  <h3 class="card-title">Informasi Skripsi</h3>
+                </div>
+                <div class="card-body">
+                  <p><strong>Judul:</strong><br><?= $data['judul'] ?? '-'; ?></p>
+                  <p><strong>Periode:</strong> <?= $data['nama_periode'] ?? '-'; ?></p>
+                  <p><strong>Tahun Akademik:</strong>
+                    <?= $data['tahun_akademik']; ?> (<?= $data['semester']; ?>)
+                  </p>
+                  <p><strong>Tanggal Pengajuan:</strong>
+                    <?= isset($data['created_at'])
+                      ? date('d-m-Y', strtotime($data['created_at']))
+                      : '-' ?>
+                  </p>
+                </div>
+              </div>
+
+            </div>
+
+            <!-- ================= KOLOM KANAN ================= -->
+            <div class="col-lg-6 col-md-12">
+              <!-- TIMELINE MAHASISWA -->
+              <div class="card card-primary">
+                <div class="card-header">
+                  <h3 class="card-title">Timeline Skripsi Mahasiswa</h3>
+                </div>
+
+                <div class="card-body">
+                  <ul class="timeline timeline-inverse flowchart">
+
+                    <!-- STEP 1 -->
+                    <li class="done">
+                      <i class="fas fa-file bg-primary"></i>
+                      <div class="timeline-item">
+                        <h3 class="timeline-header">Pengajuan Skripsi</h3>
+                        <div class="timeline-body">
+                          Mahasiswa mengajukan judul skripsi<br>
+                          <small class="text-muted">
+                            <?= date('d-m-Y', strtotime($data['created_at'])); ?>
+                          </small>
+                        </div>
+                      </div>
+                    </li>
+
+                    <!-- STEP 2 -->
+                    <li class="<?= in_array($data['status'], ['Disetujui', 'Bimbingan', 'Seminar', 'Sidang', 'Lulus']) ? 'done' : 'pending'; ?>">
+                      <i class="fas fa-check bg-success"></i>
+                      <div class="timeline-item">
+                        <h3 class="timeline-header">Disetujui</h3>
+                        <div class="timeline-body">
+                          Judul disetujui dosen / admin
+                        </div>
+                      </div>
+                    </li>
+
+                    <!-- STEP 3 -->
+                    <li class="<?= in_array($data['status'], ['Bimbingan', 'Seminar', 'Sidang', 'Lulus']) ? 'active' : 'pending'; ?>">
+                      <i class="fas fa-user-edit bg-warning"></i>
+                      <div class="timeline-item">
+                        <h3 class="timeline-header">Bimbingan</h3>
+                        <div class="timeline-body">
+                          Proses bimbingan skripsi
+                        </div>
+                      </div>
+                    </li>
+
+                    <!-- STEP 4 -->
+                    <li class="<?= in_array($data['status'], ['Seminar', 'Sidang', 'Lulus']) ? 'active' : 'pending'; ?>">
+                      <i class="fas fa-chalkboard-teacher bg-info"></i>
+                      <div class="timeline-item">
+                        <h3 class="timeline-header">Seminar</h3>
+                        <div class="timeline-body">
+                          Seminar proposal / hasil
+                        </div>
+                      </div>
+                    </li>
+
+                    <!-- STEP 5 -->
+                    <li class="<?= in_array($data['status'], ['Sidang', 'Lulus']) ? 'active' : 'pending'; ?>">
+                      <i class="fas fa-graduation-cap bg-success"></i>
+                      <div class="timeline-item">
+                        <h3 class="timeline-header">Sidang</h3>
+                        <div class="timeline-body">
+                          Sidang skripsi
+                        </div>
+                      </div>
+                    </li>
+
+                    <!-- END -->
+                    <li>
+                      <i class="fas fa-flag-checkered bg-gray"></i>
+                    </li>
+
+                  </ul>
                 </div>
               </div>
             </div>
 
-            <!-- TIMELINE BIMBINGAN -->
-            <div class="col-md-6">
-              <div class="card">
-                <div class="card-header">
-                  <h3 class="card-title">
-                    <i class="fas fa-comments"></i> Timeline Bimbingan
-                  </h3>
-                </div>
-                <div class="card-body">
-                  <?php if (mysqli_num_rows($qBimbingan) > 0) { ?>
-                    <ul class="timeline">
-                      <?php while ($b = mysqli_fetch_assoc($qBimbingan)) { ?>
-                        <li>
-                          <i class="fas fa-comment bg-warning"></i>
-                          <div class="timeline-item">
-                            <span class="time">
-                              <i class="far fa-calendar"></i>
-                              <?= date('d M Y', strtotime($b['tanggal'])); ?>
-                            </span>
-                            <h3 class="timeline-header">
-                              <?= $b['topik']; ?>
-                            </h3>
-                            <div class="timeline-body">
-                              <?= nl2br(htmlspecialchars($b['catatan'])); ?>
-                            </div>
-                          </div>
-                        </li>
-                      <?php } ?>
-                    </ul>
-                  <?php } else { ?>
-                    <p class="text-muted">Belum ada bimbingan.</p>
-                  <?php } ?>
+            <!-- PROGRESS SKRIPSI -->
+            <div class="card card-info col-md-12">
+              <div class="card-header">
+                <h3 class="card-title">Progress Skripsi</h3>
+              </div>
+              <div class="card-body">
+                <div class="progress">
+                  <div class="progress-bar progress-bar-striped bg-info"
+                    style="width: <?= $progress ?>%">
+                    <?= $progress ?>%
+                  </div>
                 </div>
               </div>
             </div>
 
           </div>
-
-          <a href="index.php" class="btn btn-secondary mt-3">
-            <i class="fas fa-arrow-left"></i> Kembali
-          </a>
-
         </div>
       </section>
-
     </div>
 
     <?php include '../footer.php'; ?>

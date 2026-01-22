@@ -49,12 +49,12 @@ function decriptData($data)
 }
 
 /* ================= QUERY MAHASISWA ================= */
-$qMhs = mysqli_query($conn, "SELECT m.nim, m.nama, p.nama_prodi, a.keterangan AS angkatan, s.status AS status_skripsi, d.nama_dosen, m.aktif FROM tbl_mahasiswa m
-LEFT JOIN tbl_prodi p ON m.prodi = p.kode_prodi
-LEFT JOIN tbl_angkatan a ON m.angkatan = a.kode_angkatan
-LEFT JOIN tbl_status s ON m.status_skripsi = s.id
-LEFT JOIN tbl_dosen d ON m.dosen_pembimbing = d.nip
-ORDER BY m.nama ASC ") or die(mysqli_error($conn));
+$qMhs = mysqli_query($conn, "SELECT m.nim, m.nama, sk.judul, a.keterangan AS angkatan, COALESCE(st.status, 'Draft') AS status_skripsi, d.nama_dosen, m.aktif FROM tbl_mahasiswa m
+  LEFT JOIN tbl_skripsi sk ON sk.username = m.nim
+  LEFT JOIN tbl_status st ON st.id = sk.status_skripsi
+  LEFT JOIN tbl_angkatan a ON m.angkatan = a.kode_angkatan
+  LEFT JOIN tbl_dosen d ON m.dosen_pembimbing = d.nip
+  ORDER BY m.nama ASC") or die(mysqli_error($conn));
 ?>
 
 <!DOCTYPE html>
@@ -132,7 +132,7 @@ ORDER BY m.nama ASC ") or die(mysqli_error($conn));
                     <th>No</th>
                     <th>NIM</th>
                     <th>Nama</th>
-                    <th>Program Studi</th>
+                    <th>Judul Skripsi</th>
                     <th>Angkatan</th>
                     <th>Progres</th>
                     <th>Dosen</th>
@@ -140,7 +140,7 @@ ORDER BY m.nama ASC ") or die(mysqli_error($conn));
                     <th>Aksi</th>
                   </tr>
                 </thead>
-                
+
                 <tbody>
                   <?php $no = 1;
                   while ($m = mysqli_fetch_assoc($qMhs)) { ?>
@@ -153,24 +153,27 @@ ORDER BY m.nama ASC ") or die(mysqli_error($conn));
                           <small class="text-muted">(nonaktif)</small>
                         <?php endif; ?>
                       </td>
-                      <td><?= $m['nama_prodi']; ?></td>
+                      <td>
+                        <?= $m['judul']
+                          ? htmlspecialchars(mb_strimwidth($m['judul'], 0, 50, '...'))
+                          : '<span class="text-muted">Belum ada judul</span>'; ?>
+                      </td>
                       <td class="text-center"><?= $m['angkatan']; ?></td>
                       <td class="text-center">
                         <?php
-                        $status = strtolower($m['status_skripsi'] ?? 'draft');
-                        $badge  = 'secondary';
-
-                        switch ($status) {
-                          case 'bimbingan': $badge = 'warning'; break;
-                          case 'seminar proposal': $badge = 'primary'; break;
-                          case 'revisi': $badge = 'purple'; break;
-                          case 'siap sidang': $badge = 'success'; break;
-                          case 'lulus': $badge = 'dark'; break;
-                          default: $badge = 'secondary';
-                        }
+                        $status = strtolower(trim($m['status_skripsi']));
+                        $map = [
+                          'draft'             => 'secondary',
+                          'bimbingan'         => 'warning',
+                          'seminar proposal'  => 'primary',
+                          'revisi'            => 'purple',
+                          'siap sidang'       => 'success',
+                          'lulus'             => 'dark'
+                        ];
+                        $badge = $map[$status] ?? 'secondary';
                         ?>
                         <span class="badge badge-<?= $badge; ?>">
-                          <?= ucfirst($m['status_skripsi'] ?? 'Draft'); ?>
+                          <?= ucfirst($m['status_skripsi']); ?>
                         </span>
                       </td>
                       <td><?= $m['nama_dosen'] ?? '-'; ?></td>
@@ -182,16 +185,6 @@ ORDER BY m.nama ASC ") or die(mysqli_error($conn));
                         <a href="editmhs.php?nim=<?= encriptData($m['nim']); ?>"
                           class="btn btn-sm btn-warning" title="Edit Data">
                           <i class="fas fa-edit"></i>
-                        </a>
-                        <!-- UBAH STATUS -->
-                        <a href="ubahstatus.php?nim=<?= encriptData($m['nim']); ?>"
-                          class="btn btn-sm btn-info" title="Ubah Status Skripsi">
-                          <i class="fas fa-sync"></i>
-                        </a>
-                        <!-- SET DOSEN -->
-                        <a href="setdosen.php?nim=<?= encriptData($m['nim']); ?>"
-                          class="btn btn-sm btn-primary" title="Set/Ganti Dosen">
-                          <i class="fas fa-user-tie"></i>
                         </a>
                         <!-- DETAIL -->
                         <a href="detailmhs.php?nim=<?= encriptData($m['nim']); ?>"

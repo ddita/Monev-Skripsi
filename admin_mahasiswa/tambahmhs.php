@@ -90,12 +90,10 @@ if ($_SESSION['role'] !== 'admin') {
         <!-- /.content-header -->
 
         <!-- Main content -->
-
         <section class="content">
           <div class="container-fluid">
-            <!-- Small boxes (Stat box) -->
             <div class="row">
-              <div class="col-lg-6">
+              <div class="col-lg-12">
                 <!-- general form elements -->
                 <div class="card card-primary">
                   <div class="card-header">
@@ -105,102 +103,111 @@ if ($_SESSION['role'] !== 'admin') {
                   <!-- form start -->
                   <form action="prosestambah.php" method="post" class="form-mahasiswa">
                     <div class="card-body">
-                      <a href="../admin_mahasiswa" class="btn btn-warning btn-sm"><i class="nav-icon fas fa-chevron-left"></i> Kembali</a>
-                      <div class="form-group">
-                        <label for="nim">NIM</label>
-                        <input type="text" class="form-control" id="nim" name="nim" maxlength="50" onkeypress="return IsNumeric(event);" placeholder="Input NIM Mahasiswa" autofocus required>
-                      </div>
-                      <div class="form-group">
-                        <label for="nama">Nama Mahasiswa</label>
-                        <input type="text" class="form-control" id="nama" name="nama" maxlength="150" placeholder="Input Nama Mahasiswa" required>
-                      </div>
-                      <div class="form-group">
-                        <label for="prodi">Program Studi</label>
-                        <select class="form-control" name="prodi" required>
-                          <option value="">-- Pilih Prodi --</option>
-                          <?php
-                          //panggil data pada data tabel prodi
-                          $pglprodi = mysqli_query($conn, "SELECT * FROM tbl_prodi") or die(mysqli_error($conn));
-                          //variabel untuk menampung return value dari query panggil prodi
-                          $rvprodi = mysqli_num_rows($pglprodi);
 
-                          //kondisi jika tabel prodi memiliki <= 1 data
-                          if ($rvprodi > 0) {
-                            //melakukan perulangan untuk menampilkan data
-                            while ($dt_prodi = mysqli_fetch_array($pglprodi)) {
-                              //tampilkan data pada option di select elemen
-                          ?>
-                              <option value="<?= $dt_prodi['kode_prodi']; ?>">
-                                <?= $dt_prodi['kode_prodi']; ?> - <?= $dt_prodi['nama_prodi']; ?>
-                              </option>
-                          <?php
-                            }
-                          }
-                          //kondisi jika tabel prodi kosong
-                          else {
-                          }
-                          ?>
-                        </select>
-                      </div>
-                      <div class="form-group">
-                        <label for="status">Status</label>
-                        <select class="form-control" name="status" required>
-                          <option value="">-- Pilih Status --</option>
-                          <?php
-                          //panggil data pada data tabel status
-                          $pglstatus = mysqli_query($conn, "SELECT * FROM tbl_status") or die(mysqli_error($conn));
-                          //variabel untuk menampung return value dari query panggil prodi
-                          $rvstatus = mysqli_num_rows($pglstatus);
+                      <a href="../admin_mahasiswa" class="btn btn-warning btn-sm mb-3">
+                        <i class="nav-icon fas fa-chevron-left"></i> Kembali
+                      </a>
 
-                          //kondisi jika tabel prodi memiliki <= 1 data
-                          if ($rvstatus > 0) {
-                            //melakukan perulangan untuk menampilkan data
-                            while ($dt_status = mysqli_fetch_array($pglstatus)) {
-                              //tampilkan data pada option di select elemen
-                          ?>
-                              <option value="<?= $dt_status['id']; ?>">
-                                <?= $dt_status['id']; ?> - <?= $dt_status['status']; ?>
-                              </option>
-                          <?php
-                            }
-                          }
-                          //kondisi jika tabel prodi kosong
-                          else {
-                          }
-                          ?>
-                        </select>
-                      </div>
-                      <div class="form-group">
-                        <label for="nip_dosen">Dosen Pembimbing</label>
-                        <select name="nip_dosen" class="form-control" required>
-                          <option value="">-- Pilih Dosen Pembimbing --</option>
-                          <?php
-                          $qdosen = mysqli_query($conn, "SELECT nip, nama_dosen FROM tbl_dosen");
-                          while ($dnip = mysqli_fetch_assoc($qdosen)) {
-                            echo '<option value="' . $dnip['nip'] . '">' . $dnip['nama_dosen'] . '</option>';
-                          }
-                          ?>
-                        </select>
-                      </div>
-                      <div class="form-group">
-                        <label for="angkatan">Angkatan</label>
-                        <select name="angkatan" class="form-control" required>
-                          <option value="">-- Pilih Angkatan --</option>
-                          <?php
-                          $qAngkatan = mysqli_query($conn, "SELECT kode_angkatan FROM tbl_angkatan ORDER BY kode_angkatan DESC");
-                          while ($a = mysqli_fetch_assoc($qAngkatan)) {
-                          ?>
-                            <option value="<?= $a['kode_angkatan']; ?>">
-                              <?= $a['kode_angkatan']; ?>
-                            </option>
-                          <?php } ?>
-                        </select>
-                      </div>
+                      <div class="row">
+
+                        <!-- ================= KOLOM KIRI : DATA MAHASISWA ================= -->
+                        <div class="col-md-6">
+                          <h5 class="text-muted">Data Mahasiswa</h5>
+                          <hr>
+
+                          <div class="form-group">
+                            <label>NIM</label>
+                            <input type="text" name="nim" class="form-control" required>
+                          </div>
+
+                          <div class="form-group">
+                            <label>Nama Mahasiswa</label>
+                            <input type="text" name="nama" class="form-control" required>
+                          </div>
+
+                          <div class="form-group">
+                            <label>Program Studi</label>
+                            <select name="prodi" class="form-control" required>
+                              <option value="" selected disabled>--- Pilih Program Studi ---</option>
+                              <?php
+                              $q = mysqli_query($conn, "SELECT * FROM tbl_prodi");
+                              while ($p = mysqli_fetch_assoc($q)) {
+                                echo "<option value='{$p['kode_prodi']}'>{$p['nama_prodi']}</option>";
+                              }
+                              ?>
+                            </select>
+                          </div>
+
+                          <div class="form-group">
+                            <label>Angkatan</label>
+                            <select name="angkatan" class="form-control" required>
+                              <option value="" selected disabled>--- Pilih Angkatan ---</option>
+                              <?php
+                              $q = mysqli_query($conn, "SELECT * FROM tbl_angkatan");
+                              while ($a = mysqli_fetch_assoc($q)) {
+                                echo "<option value='{$a['kode_angkatan']}'>{$a['kode_angkatan']}</option>";
+                              }
+                              ?>
+                            </select>
+                          </div>
+
+                          <div class="form-group">
+                            <label>Dosen Pembimbing</label>
+                            <select name="nip_dosen" class="form-control" required>
+                              <option value="" selected disabled>--- Pilih Dosen Pembimbing ---</option>
+                              <?php
+                              $q = mysqli_query($conn, "SELECT nip,nama_dosen FROM tbl_dosen");
+                              while ($d = mysqli_fetch_assoc($q)) {
+                                echo "<option value='{$d['nip']}'>{$d['nama_dosen']}</option>";
+                              }
+                              ?>
+                            </select>
+                          </div>
+                        </div>
+
+                        <!-- ================= KOLOM KANAN : DATA SKRIPSI ================= -->
+                        <div class="col-md-6">
+                          <h5 class="text-muted">Data Skripsi</h5>
+                          <div class="form-group">
+                            <label>Judul Skripsi</label>
+                            <textarea name="judul" class="form-control" rows="4" required></textarea>
+                          </div>
+
+                          <div class="form-group">
+                            <label>Status Skripsi</label>
+                            <select name="status_skripsi" class="form-control" required>
+                              <option value="" selected disabled>--- Pilih Status Skripsi ---</option>
+                              <?php
+                              $q = mysqli_query($conn, "SELECT * FROM tbl_status");
+                              while ($s = mysqli_fetch_assoc($q)) {
+                                echo "<option value='{$s['id']}'>{$s['status']}</option>";
+                              }
+                              ?>
+                            </select>
+                          </div>
+
+                          <div class="form-group">
+                            <label>Periode</label>
+                            <select name="id_periode" class="form-control" required>
+                              <option value="" selected disabled>--- Pilih Periode ---</option>
+                              <?php
+                              $q = mysqli_query($conn, "SELECT * FROM tbl_periode");
+                              while ($p = mysqli_fetch_assoc($q)) {
+                                echo "<option value='{$p['id_periode']}'>{$p['nama_periode']}</option>";
+                              }
+                              ?>
+                            </select>
+                          </div>
+                        </div>
+
+                      </div> <!-- /.row -->
                     </div>
-                    <!-- /.card-body -->
 
+                    <!-- ================= TOMBOL SUBMIT (SATU) ================= -->
                     <div class="card-footer">
-                      <button type="submit" class="btn btn-primary btn-block" name="tambahmhs"><i class="nav-icon fas fa-plus"></i> Tambah Data</button>
+                      <button type="submit" class="btn btn-primary btn-block" name="tambahmhs">
+                        <i class="nav-icon fas fa-plus"></i> Tambah Data
+                      </button>
                     </div>
                   </form>
                 </div>
