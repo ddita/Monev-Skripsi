@@ -290,12 +290,14 @@ $rata_hari = round($dataRata['rata_hari'] ?? 0);
 
           <?php
           // AKTIVITAS SKRIPSI TERAKHIR
-          $qAktivitas = mysqli_query($conn, "SELECT s.id_skripsi, s.username, m.nama AS nama_mahasiswa, s.judul, st.status AS status_skripsi, s.updated_at, DATEDIFF(NOW(), s.updated_at) AS selisih_hari FROM tbl_skripsi s
-              JOIN tbl_mahasiswa m ON m.nim = s.username
-              JOIN tbl_status st ON st.id = s.status_skripsi
-              ORDER BY s.updated_at DESC
-              LIMIT 5");
-
+          $qAktivitas = mysqli_query($conn, "SELECT s.id_skripsi, s.username, m.nama AS nama_mahasiswa, d.nip AS nip_dosen, d.nama_dosen, st.status AS status_skripsi, s.updated_at, DATEDIFF(NOW(), s.updated_at) AS selisih_hari
+                  FROM tbl_skripsi s
+                  JOIN tbl_mahasiswa m ON m.nim = s.username
+                  LEFT JOIN tbl_dosen d ON d.nip = m.dosen_pembimbing
+                  JOIN tbl_status st ON st.id = s.status_skripsi
+                  ORDER BY s.updated_at DESC
+                  LIMIT 5
+                  ");
           ?>
 
           <!-- AKTIVITAS -->
@@ -311,7 +313,7 @@ $rata_hari = round($dataRata['rata_hari'] ?? 0);
                 <thead>
                   <tr>
                     <th class="text-center">Mahasiswa</th>
-                    <th class="text-center">Judul</th>
+                    <th class="text-center">Dosen Pembimbing</th>
                     <th class="text-center">Status</th>
                     <th class="text-center">Update</th>
                   </tr>
@@ -339,10 +341,19 @@ $rata_hari = round($dataRata['rata_hari'] ?? 0);
 
                       <!-- JUDUL -->
                       <td>
-                        <i class="fas fa-book text-secondary"></i>
-                        <?= strlen($row['judul']) > 40
-                          ? substr(htmlspecialchars($row['judul']), 0, 40) . '...'
-                          : htmlspecialchars($row['judul']); ?>
+                        <?php if (!empty($row['nip_dosen'])): ?>
+                          <a href="../admin_dosen/detaildosen.php?nip=<?= encryptData($row['nip_dosen']); ?>"
+                            class="text-decoration-none fw-bold"
+                            data-bs-toggle="tooltip"
+                            title="Lihat detail dosen">
+                            <i class="fas fa-user-tie text-primary"></i>
+                            <?= htmlspecialchars($row['nama_dosen']); ?>
+                          </a>
+                        <?php else: ?>
+                          <span class="text-muted fst-italic">
+                            <i class="fas fa-user-slash"></i> Belum ditentukan
+                          </span>
+                        <?php endif; ?>
                       </td>
 
                       <!-- STATUS -->
