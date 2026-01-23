@@ -95,6 +95,18 @@ function statusBadge($status)
       </span>';
   }
 }
+
+function encryptData($data)
+{
+  $key = 'monev_skripsi_2024'; // HARUS sama dengan detailmhs.php
+
+  return urlencode(
+    base64_encode(
+      openssl_encrypt($data, 'AES-128-ECB', $key)
+    )
+  );
+}
+
 ?>
 
 <?php
@@ -278,9 +290,12 @@ $rata_hari = round($dataRata['rata_hari'] ?? 0);
 
           <?php
           // AKTIVITAS SKRIPSI TERAKHIR
-          $qAktivitas = mysqli_query($conn, "SELECT s.id_skripsi, s.username, s.judul, st.status AS status_skripsi, s.updated_at, DATEDIFF(NOW(), s.updated_at) AS selisih_hari FROM tbl_skripsi s
-            JOIN tbl_status st ON st.id = s.status_skripsi ORDER BY s.updated_at DESC
-            LIMIT 5");
+          $qAktivitas = mysqli_query($conn, "SELECT s.id_skripsi, s.username, m.nama AS nama_mahasiswa, s.judul, st.status AS status_skripsi, s.updated_at, DATEDIFF(NOW(), s.updated_at) AS selisih_hari FROM tbl_skripsi s
+              JOIN tbl_mahasiswa m ON m.nim = s.username
+              JOIN tbl_status st ON st.id = s.status_skripsi
+              ORDER BY s.updated_at DESC
+              LIMIT 5");
+
           ?>
 
           <!-- AKTIVITAS -->
@@ -313,12 +328,12 @@ $rata_hari = round($dataRata['rata_hari'] ?? 0);
                     <tr class="<?= $rowClass ?>">
                       <!-- USERNAME -->
                       <td>
-                        <a href="detail_skripsi.php?id=<?= $row['id_skripsi']; ?>"
+                        <a href="../admin_mahasiswa/detailmhs.php?nim=<?= encryptData($row['username']); ?>"
                           class="fw-bold text-decoration-none"
                           data-bs-toggle="tooltip"
                           title="Lihat detail skripsi">
                           <i class="fas fa-user"></i>
-                          <?= htmlspecialchars($row['username']); ?>
+                          <?= htmlspecialchars($row['nama_mahasiswa']); ?>
                         </a>
                       </td>
 

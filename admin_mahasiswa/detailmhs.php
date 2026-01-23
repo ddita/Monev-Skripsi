@@ -99,11 +99,12 @@ $data = mysqli_fetch_assoc($q);
 
 /* ================= PROGRESS ================= */
 $progressMap = [
-  'Diajukan'  => 20,
-  'Disetujui' => 40,
-  'Bimbingan' => 60,
-  'Seminar'   => 80,
-  'Sidang'    => 100
+  'Draft'  => 0,
+  'Bimbingan' => 20,
+  'Seminar' => 40,
+  'Revisi'   => 60,
+  'Sidang'    => 80,
+  'Lulus'    => 100
 ];
 $progress = $progressMap[$data['status'] ?? ''] ?? 0;
 ?>
@@ -174,6 +175,8 @@ $progress = $progressMap[$data['status'] ?? ''] ?? 0;
                   if ($data['status'] == 'Lulus') $badge = 'success';
                   elseif ($data['status'] == 'Bimbingan') $badge = 'warning';
                   elseif ($data['status'] == 'Seminar') $badge = 'info';
+                  elseif ($data['status'] == 'Revisi') $badge = 'danger';
+                  elseif ($data['status'] == 'Siap Sidang') $badge = 'primary';
                   ?>
                   <span class="badge badge-<?= $badge ?>">
                     <?= $data['status'] ?? 'Belum Mengajukan'; ?>
@@ -212,6 +215,10 @@ $progress = $progressMap[$data['status'] ?? ''] ?? 0;
                 </div>
               </div>
 
+            </div>
+
+            <!-- ================= KOLOM KANAN ================= -->
+            <div class="col-lg-6 col-md-12">
               <!-- INFORMASI SKRIPSI -->
               <div class="card card-success">
                 <div class="card-header">
@@ -228,86 +235,6 @@ $progress = $progressMap[$data['status'] ?? ''] ?? 0;
                       ? date('d-m-Y', strtotime($data['created_at']))
                       : '-' ?>
                   </p>
-                </div>
-              </div>
-
-            </div>
-
-            <!-- ================= KOLOM KANAN ================= -->
-            <div class="col-lg-6 col-md-12">
-              <!-- TIMELINE MAHASISWA -->
-              <div class="card card-primary">
-                <div class="card-header">
-                  <h3 class="card-title">Timeline Skripsi Mahasiswa</h3>
-                </div>
-
-                <div class="card-body">
-                  <ul class="timeline timeline-inverse flowchart">
-
-                    <!-- STEP 1 -->
-                    <li class="done">
-                      <i class="fas fa-file bg-primary"></i>
-                      <div class="timeline-item">
-                        <h3 class="timeline-header">Pengajuan Skripsi</h3>
-                        <div class="timeline-body">
-                          Mahasiswa mengajukan judul skripsi<br>
-                          <small class="text-muted">
-                            <?= date('d-m-Y', strtotime($data['created_at'])); ?>
-                          </small>
-                        </div>
-                      </div>
-                    </li>
-
-                    <!-- STEP 2 -->
-                    <li class="<?= in_array($data['status'], ['Disetujui', 'Bimbingan', 'Seminar', 'Sidang', 'Lulus']) ? 'done' : 'pending'; ?>">
-                      <i class="fas fa-check bg-success"></i>
-                      <div class="timeline-item">
-                        <h3 class="timeline-header">Disetujui</h3>
-                        <div class="timeline-body">
-                          Judul disetujui dosen / admin
-                        </div>
-                      </div>
-                    </li>
-
-                    <!-- STEP 3 -->
-                    <li class="<?= in_array($data['status'], ['Bimbingan', 'Seminar', 'Sidang', 'Lulus']) ? 'active' : 'pending'; ?>">
-                      <i class="fas fa-user-edit bg-warning"></i>
-                      <div class="timeline-item">
-                        <h3 class="timeline-header">Bimbingan</h3>
-                        <div class="timeline-body">
-                          Proses bimbingan skripsi
-                        </div>
-                      </div>
-                    </li>
-
-                    <!-- STEP 4 -->
-                    <li class="<?= in_array($data['status'], ['Seminar', 'Sidang', 'Lulus']) ? 'active' : 'pending'; ?>">
-                      <i class="fas fa-chalkboard-teacher bg-info"></i>
-                      <div class="timeline-item">
-                        <h3 class="timeline-header">Seminar</h3>
-                        <div class="timeline-body">
-                          Seminar proposal / hasil
-                        </div>
-                      </div>
-                    </li>
-
-                    <!-- STEP 5 -->
-                    <li class="<?= in_array($data['status'], ['Sidang', 'Lulus']) ? 'active' : 'pending'; ?>">
-                      <i class="fas fa-graduation-cap bg-success"></i>
-                      <div class="timeline-item">
-                        <h3 class="timeline-header">Sidang</h3>
-                        <div class="timeline-body">
-                          Sidang skripsi
-                        </div>
-                      </div>
-                    </li>
-
-                    <!-- END -->
-                    <li>
-                      <i class="fas fa-flag-checkered bg-gray"></i>
-                    </li>
-
-                  </ul>
                 </div>
               </div>
             </div>

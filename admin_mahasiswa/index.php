@@ -116,6 +116,9 @@ $qMhs = mysqli_query($conn, "SELECT m.nim, m.nama, sk.judul, a.keterangan AS ang
                 <a href="tambahmhs.php" class="btn btn-primary btn-sm">
                   <i class="fas fa-user-plus"></i> Tambah
                 </a>
+                <button type="button" class="btn btn-warning btn-sm" data-toggle="modal" data-target="#importModal">
+                  <i class="fas fa-file"></i> Import
+                </button>
                 <a href="export_excel.php" class="btn btn-success btn-sm">
                   <i class="fas fa-file-excel"></i> Excel
                 </a>
@@ -182,21 +185,21 @@ $qMhs = mysqli_query($conn, "SELECT m.nim, m.nama, sk.judul, a.keterangan AS ang
                       </td>
                       <td class="text-center">
                         <!-- EDIT DATA -->
-                        <a href="editmhs.php?nim=<?= encriptData($m['nim']); ?>"
-                          class="btn btn-sm btn-warning" title="Edit Data">
-                          <i class="fas fa-edit"></i>
-                        </a>
-                        <!-- DETAIL -->
-                        <a href="detailmhs.php?nim=<?= encriptData($m['nim']); ?>"
-                          class="btn btn-sm btn-secondary" title="Detail & Timeline">
+                        <?php if ($m['aktif'] == 1) { ?>
+                          <a href="editmhs.php?nim=<?= encriptData($m['nim']); ?>" class="btn btn-sm btn-warning" title="Edit Data">
+                            <i class="fas fa-edit"></i>
+                          </a>
+                        <?php } ?>
+
+                        <!-- DETAIL MAHASISWA -->
+                        <a href="detailmhs.php?nim=<?= encriptData($m['nim']); ?>" class="btn btn-sm btn-secondary" title="Detail & Timeline">
                           <i class="fas fa-eye"></i>
                         </a>
-                        <!-- AKTIF / NONAKTIF -->
+
+                        <!-- NONAKTIFKAN -->
                         <?php if ($m['aktif'] == 1) { ?>
-                          <a href="prosesnonaktif.php?nim=<?= encriptData($m['nim']); ?>"
-                            class="btn btn-sm btn-danger"
-                            onclick="return confirm('Nonaktifkan mahasiswa ini?')"
-                            title="Nonaktifkan">
+                          <a href="prosesnonaktif.php?nim=<?= encriptData($m['nim']); ?>" class="btn btn-sm btn-danger"
+                            onclick="return confirm('Nonaktifkan mahasiswa ini?')" title="Nonaktifkan">
                             <i class="fas fa-user-slash"></i>
                           </a>
                         <?php } ?>
@@ -218,6 +221,30 @@ $qMhs = mysqli_query($conn, "SELECT m.nim, m.nama, sk.judul, a.keterangan AS ang
 
         </div>
       </section>
+
+      <!-- Modal Import -->
+      <div class="modal fade" id="importModal" tabindex="-1" role="dialog" aria-labelledby="importModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+          <form method="POST" enctype="multipart/form-data" action="prosesimport.php">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title" id="importModalLabel">Import Data Mahasiswa</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                  <span aria-hidden="true">&times;</span>
+                </button>
+              </div>
+              <div class="modal-body">
+                <p>Pilih file Excel (.xlsx / .xls) yang akan diimport.</p>
+                <input type="file" name="file_excel" accept=".xlsx,.xls" required>
+              </div>
+              <div class="modal-footer">
+                <button type="submit" name="import" class="btn btn-primary">Import</button>
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
 
     </div>
 

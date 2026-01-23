@@ -106,9 +106,7 @@ if (!$mhs) {
 
                                 <form action="prosesedit.php" method="POST">
                                     <div class="card-body">
-
                                         <input type="hidden" name="nim" value="<?= $mhs['nim']; ?>">
-
                                         <div class="form-group">
                                             <label>NIM</label>
                                             <input type="text" class="form-control" value="<?= $mhs['nim']; ?>" readonly>
@@ -117,7 +115,7 @@ if (!$mhs) {
                                         <div class="form-group">
                                             <label>Nama Mahasiswa</label>
                                             <input type="text" name="nama" class="form-control"
-                                                value="<?= htmlspecialchars($mhs['nama']); ?>" required>
+                                                value="<?= htmlspecialchars($mhs['nama']); ?>" readonly>
                                         </div>
 
                                         <!-- PRODI -->
