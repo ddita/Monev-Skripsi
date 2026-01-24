@@ -23,11 +23,7 @@ function logAktivitas($conn, $ket)
   $usr   = $_SESSION['username'] ?? '-';
   $waktu = date('Y-m-d H:i:s');
 
-  $stmt = mysqli_prepare(
-    $conn,
-    "INSERT INTO tbl_cross_auth (username, waktu, keterangan)
-     VALUES (?, ?, ?)"
-  );
+  $stmt = mysqli_prepare($conn, "INSERT INTO tbl_cross_auth (username, waktu, keterangan) VALUES (?, ?, ?)");
   mysqli_stmt_bind_param($stmt, "sss", $usr, $waktu, $ket);
   mysqli_stmt_execute($stmt);
   mysqli_stmt_close($stmt);

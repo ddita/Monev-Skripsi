@@ -239,6 +239,13 @@ $dataProgres = [];
                             <i class="fas fa-eye"></i>
                           </a>
 
+                          <!-- DETAIL MAHASISWA BIMBINGAN -->
+                          <a href="detail_bimbingan.php?nip=<?= encriptData($row['nip']); ?>"
+                            class="btn btn-sm btn-info"
+                            title="Detail Mahasiswa Bimbingan">
+                            <i class="fas fa-users"></i>
+                          </a>
+
                           <!-- NONAKTIFKAN -->
                           <?php if ($row['aktif'] == 1) { ?>
                             <a href="prosesnonaktif.php?nim=<?= encriptData($row['nip']); ?>" class="btn btn-sm btn-danger"
