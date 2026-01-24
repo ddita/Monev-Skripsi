@@ -104,7 +104,7 @@ if (!$mhs) {
                                     </h3>
                                 </div>
 
-                                <form action="prosesedit.php" method="POST">
+                                <form action="proses.php?action=edit" method="POST">
                                     <div class="card-body">
                                         <input type="hidden" name="nim" value="<?= $mhs['nim']; ?>">
                                         <div class="form-group">

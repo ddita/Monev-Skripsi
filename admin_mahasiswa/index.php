@@ -118,11 +118,11 @@ $qMhs = mysqli_query($conn, "SELECT m.nim, m.nama, sk.judul, a.keterangan AS ang
                 <button type="button" class="btn btn-warning btn-sm" data-toggle="modal" data-target="#importModal">
                   <i class="fas fa-file"></i> Import
                 </button>
-                <a href="export_excel.php" class="btn btn-success btn-sm">
-                  <i class="fas fa-file-excel"></i> Excel
+                <a href="export.php?type=excel" class="btn btn-success btn-sm">
+                  <i class="fas fa-file-excel"></i> Export Excel
                 </a>
-                <a href="export_pdf.php" class="btn btn-danger btn-sm">
-                  <i class="fas fa-file-pdf"></i> PDF
+                <a href="export.php?type=pdf" class="btn btn-danger btn-sm">
+                  <i class="fas fa-file-pdf"></i> Export PDF
                 </a>
               </div>
             </div>
@@ -197,13 +197,15 @@ $qMhs = mysqli_query($conn, "SELECT m.nim, m.nama, sk.judul, a.keterangan AS ang
 
                         <!-- NONAKTIFKAN -->
                         <?php if ($m['aktif'] == 1) { ?>
-                          <a href="prosesnonaktif.php?nim=<?= encriptData($m['nim']); ?>" class="btn btn-sm btn-danger"
-                            onclick="return confirm('Nonaktifkan mahasiswa ini?')" title="Nonaktifkan">
+                          <a href="proses.php?action=nonaktif&nim=<?= encriptData($m['nim']); ?>"
+                            class="btn btn-sm btn-danger"
+                            onclick="return confirm('Nonaktifkan mahasiswa ini?')"
+                            title="Nonaktifkan">
                             <i class="fas fa-user-slash"></i>
                           </a>
                         <?php } ?>
                         <!-- HAPUS -->
-                        <a href="hapusmhs.php?nim=<?= encriptData($m['nim']); ?>"
+                        <a href="proses.php?action=hapus&nim=<?= encriptData($m['nim']); ?>"
                           class="btn btn-sm btn-dark"
                           onclick="return confirm('Hapus permanen data mahasiswa?')"
                           title="Hapus">
@@ -224,7 +226,7 @@ $qMhs = mysqli_query($conn, "SELECT m.nim, m.nama, sk.judul, a.keterangan AS ang
       <!-- Modal Import -->
       <div class="modal fade" id="importModal" tabindex="-1" role="dialog" aria-labelledby="importModalLabel" aria-hidden="true">
         <div class="modal-dialog" role="document">
-          <form method="POST" enctype="multipart/form-data" action="prosesimport.php">
+          <form method="POST" enctype="multipart/form-data" action="import.php">
             <div class="modal-content">
               <div class="modal-header">
                 <h5 class="modal-title" id="importModalLabel">Import Data Mahasiswa</h5>

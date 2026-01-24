@@ -103,7 +103,7 @@ $progressMap = [
   'Bimbingan' => 20,
   'Seminar' => 40,
   'Revisi'   => 60,
-  'Sidang'    => 80,
+  'Siap Sidang'    => 80,
   'Lulus'    => 100
 ];
 $progress = $progressMap[$data['status'] ?? ''] ?? 0;

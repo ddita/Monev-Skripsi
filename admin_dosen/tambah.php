@@ -101,7 +101,7 @@ if ($_SESSION['role'] !== 'admin') {
                   </div>
                   <!-- /.card-header -->
                   <!-- form start -->
-                  <form action="prosestambah.php" method="post" class="form-mahasiswa">
+                  <form action="proses.php?action=tambah" method="POST">
                     <div class="card-body">
 
                       <a href="../admin_dosen" class="btn btn-warning btn-sm mb-3">
