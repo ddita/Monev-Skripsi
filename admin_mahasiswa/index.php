@@ -74,7 +74,6 @@ $qMhs = mysqli_query($conn, "SELECT m.nim, m.nama, sk.judul, a.keterangan AS ang
 </head>
 
 <body class="hold-transition sidebar-mini layout-fixed layout-navbar-fixed">
-
   <div class="wrapper">
     <?php include '../mhs_navbar.php'; ?>
     <?php include '../admin_sidebar.php'; ?>
@@ -89,7 +88,7 @@ $qMhs = mysqli_query($conn, "SELECT m.nim, m.nama, sk.judul, a.keterangan AS ang
         <div class="container-fluid">
           <div class="row mb-2">
             <div class="col-sm-6">
-              <h1>Master Data Mahasiswa</h1>
+              <h1>Manajemen Mahasiswa</h1>
               <small class="text-muted">Data Mahasiswa Skripsi</small>
             </div>
             <div class="col-sm-6">
@@ -247,10 +246,8 @@ $qMhs = mysqli_query($conn, "SELECT m.nim, m.nama, sk.judul, a.keterangan AS ang
       </div>
 
     </div>
-
     <?php include '../footer.php'; ?>
   </div>
-
   <?php include '../mhs_script.php'; ?>
 
 </body>

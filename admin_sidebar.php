@@ -81,8 +81,8 @@ $isManajemenOpen = in_array($konstruktor, $manajemenPages);
 
             <!-- MANAJEMEN DOSEN -->
             <li class="nav-item">
-              <a href="../admin_manajemen_dosen"
-                class="nav-link <?= $konstruktor == 'admin_manajemen_dosen' ? 'active' : ''; ?>">
+              <a href="../admin_dosen"
+                class="nav-link <?= $konstruktor == 'admin_dosen' ? 'active' : ''; ?>">
                 <i class="far fa-circle nav-icon"></i>
                 <p>Manajemen Dosen</p>
               </a>
