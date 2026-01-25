@@ -180,7 +180,7 @@ $qMhs = mysqli_query($conn, "SELECT m.nim, m.nama, sk.judul, a.keterangan AS ang
                           'draft'             => 'secondary',
                           'bimbingan'         => 'warning',
                           'seminar proposal'  => 'primary',
-                          'revisi'            => 'purple',
+                          'revisi'            => 'light',
                           'siap sidang'       => 'success',
                           'lulus'             => 'dark'
                         ];

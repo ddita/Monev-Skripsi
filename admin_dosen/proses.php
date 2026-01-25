@@ -1,143 +1,219 @@
-<!DOCTYPE html>
-<html>
-<head>
-	<meta charset="utf-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1">
-	<title></title>
-</head>
-<body>
-    <?php
-    session_start();
-    require_once '../database/config.php';
-    require '../lib/phpexcel-xls-library/vendor/phpoffice/phpexcel/Classes/PHPExcel.php';
-    // Delet Data
-    $kd_dosen = @$_GET['kd_dosen'];
-    $de_kddosen = decriptData($kd_dosen);
-    $hapus = @$_GET['hapus'];
-    if(@$hapus=='hapus'){
-        echo '<script>alert("Data Dosen dengan NIDN [ '.$de_kddosen.' ] berhasil di hapus broo")</script>';
-        $qrdeldosen = mysqli_query($conn, "DELETE FROM tbl_dosen WHERE nidn = '$de_kddosen'") or die (mysqli_error($conn));
-        $qrdelpengguna = mysqli_query($conn, "DELETE FROM tbl_pengguna WHERE username = '$de_kddosen'") or die (mysqli_error($conn));
+<?php
+session_start();
+require_once '../database/config.php';
 
-        echo '<script>window.location="../admin_master_dosen"</script>';
-    }
-    
-    //reset password
-    $resetpw = @$_GET['resetpw'];
-    if($resetpw=='resetpw'){
-        $passreset = sha1($kd_dosen);
-        $qrresetpw = mysqli_query($conn, "UPDATE tbl_pengguna SET password='$passreset' WHERE username='$de_kddosen'") or die (mysqli_error($conn));
+/* ================== CEK LOGIN ADMIN ================== */
+if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'admin') {
+    header("Location: ../login/logout.php");
+    exit;
+}
 
-        echo '<script>alert("password dengan NIDN [ '.$de_kddosen.' ] berhasil di reset")</script>';
-        echo '<script>window.location="../admin_master_dosen"</script>';
-    }
+/* ================== KONFIG ================== */
+date_default_timezone_set('Asia/Jakarta');
 
-    // Tambah data
-    if(isset($_POST['tambahdosen'])){
-        $nidn = trim(mysqli_real_escape_string($conn, $_POST['nidn']));
-        $nama = trim(mysqli_real_escape_string($conn, $_POST['nama']));
-        $email = trim(mysqli_real_escape_string($conn, $_POST['email']));
-        $kontak = trim(mysqli_real_escape_string($conn, $_POST['kontak']));
-        $status = trim(mysqli_real_escape_string($conn, $_POST['status']));
-        $password = sha1($nidn);
-        $stt_dosen = "1";
+/* ================== FUNGSI UTIL ================== */
+function decriptData($data)
+{
+    $key = 'monev_skripsi_2024';
+    return openssl_decrypt(base64_decode(urldecode($data)), 'AES-128-ECB', $key);
+}
 
-        $querycek = mysqli_query($conn, "SELECT * FROM tbl_dosen WHERE nidn='$nidn'") or die (mysqli_error($conn));
-        $returnvalue = mysqli_num_rows($querycek);
+function encriptData($data)
+{
+    $key = 'monev_skripsi_2024';
+    return urlencode(
+        base64_encode(
+            openssl_encrypt($data, 'AES-128-ECB', $key)
+        )
+    );
+}
 
-        if($returnvalue==0){
-            mysqli_query($conn, "INSERT INTO tbl_dosen VALUES ('$nidn','$nama','$email','$kontak','$status')") or die (mysqli_error($conn));
-            $querytambahdosen = mysqli_query($conn, "INSERT INTO tbl_pengguna VALUES ('$nidn','$password','$nama','$stt_dosen')") or die (mysqli_error($conn));
+function logAktivitas($conn, $ket)
+{
+    $usr   = $_SESSION['username'] ?? '-';
+    $waktu = date('Y-m-d H:i:s');
 
-            echo '<script>alert("Dosen dengan NIDN [ '.$nidn.' ] atas nama [ '.$nama.' ] berhasil ditambahkan")</script>';
-            echo '<script>window.location="../admin_master_dosen"</script>';
-        } else{
-            echo '<script>alert("Dosen dengan NIDN [ '.$nidn.' ] sudah ada dalam database")</script>';
-            echo '<script>window.location="../admin_master_dosen/tambahdosen.php"</script>';
+    $stmt = mysqli_prepare($conn, "INSERT INTO tbl_cross_auth (username, waktu, keterangan) VALUES (?, ?, ?)");
+    mysqli_stmt_bind_param($stmt, "sss", $usr, $waktu, $ket);
+    mysqli_stmt_execute($stmt);
+    mysqli_stmt_close($stmt);
+}
+
+/* ================== ACTION ================== */
+$action = $_GET['action'] ?? $_POST['action'] ?? '';
+
+mysqli_begin_transaction($conn);
+
+try {
+
+    /* =====================================================
+   ➕ TAMBAH DOSEN
+===================================================== */
+    if ($action === 'tambah_dosen') {
+
+        $nip        = trim($_POST['nip']);
+        $nama_dosen = trim($_POST['nama_dosen']);
+
+        if ($nip === '' || $nama_dosen === '') {
+            throw new Exception("NIP dan Nama Dosen wajib diisi");
         }
+
+        /* === CEK DUPLIKAT DOSEN === */
+        $cek = mysqli_prepare($conn, "SELECT nip FROM tbl_dosen WHERE nip=?");
+        mysqli_stmt_bind_param($cek, "s", $nip);
+        mysqli_stmt_execute($cek);
+        mysqli_stmt_store_result($cek);
+
+        if (mysqli_stmt_num_rows($cek) > 0) {
+            throw new Exception("Dosen dengan NIP $nip sudah terdaftar");
+        }
+        mysqli_stmt_close($cek);
+
+        /* === INSERT tbl_dosen === */
+        $stmt = mysqli_prepare(
+            $conn,
+            "INSERT INTO tbl_dosen (nip, nama_dosen, aktif)
+     VALUES (?, ?, 1)"
+        );
+        mysqli_stmt_bind_param($stmt, "ss", $nip, $nama_dosen);
+        mysqli_stmt_execute($stmt);
+        mysqli_stmt_close($stmt);
+
+        /* === INSERT tbl_users === */
+        $password = sha1($nip);
+
+        $stmt = mysqli_prepare(
+            $conn,
+            "INSERT INTO tbl_users (username, password, nama_lengkap, role, status, created_at)
+        VALUES (?, ?, ?, 'dosen', 'aktif', NOW())"
+        );
+        mysqli_stmt_bind_param($stmt, "sss", $nip, $password, $nama_dosen);
+        mysqli_stmt_execute($stmt);
+        mysqli_stmt_close($stmt);
+
+        logAktivitas($conn, "Menambahkan dosen $nip");
     }
 
-    // reset data
-    $reset = @$_GET['reset'];
-    if($reset=="reset_data"){
+    /* =====================================================
+   ✏️ UPDATE DOSEN (FINAL VERSION)
+===================================================== */
+    if ($action === 'update_dosen') {
 
-    // ambil nidn dari tabel dosen
-        $querynidndosen = mysqli_query($conn, "SELECT * FROM tbl_dosen") or die (mysqli_error($conn));
-    //return value
-        $returnvalue = mysqli_num_rows($querynidndosen);
+        $nip         = mysqli_real_escape_string($conn, $_POST['nip']);
+        $nama_dosen  = mysqli_real_escape_string($conn, trim($_POST['nama_dosen']));
+        $status_user = mysqli_real_escape_string($conn, $_POST['status_user']);
+        $aktif       = (int) $_POST['aktif']; // ⬅️ PASTI ADA (dari select)
 
-        if($returnvalue>0){
-        // proses perulangan sebanyak record yang ditentukan pada database
-            while($data = mysqli_fetch_assoc($querynidndosen)){
-            // menampung nidn pada setiap perulangan di dalam variabel $nidn_dosen
-                $nidn_dosen = $data['nidn'];
-                // mengapus data berdasarkan nidn pada setiap perulangan
-                $qrdelpengguna = mysqli_query($conn, "DELETE FROM tbl_pengguna WHERE username = '$nidn_dosen'") or die (mysqli_error($conn));
+        mysqli_begin_transaction($conn);
+
+        try {
+
+            // 🔹 Update tbl_dosen
+            $q1 = mysqli_query($conn, "
+            UPDATE tbl_dosen
+            SET nama_dosen = '$nama_dosen',
+                aktif = '$aktif'
+            WHERE nip = '$nip'
+        ");
+            if (!$q1) {
+                throw new Exception(mysqli_error($conn));
             }
-        } else{
 
-        }
-
-        $queryresetdosen = mysqli_query($conn,"TRUNCATE TABLE tbl_dosen") or die (mysqli_error($conn));
-
-        echo '<script>alert("Semua data sudah berhasil di reset boyyy... keren")</script>';
-        echo '<script>window.location = "../admin_master_dosen"</script>';
-    }
-    ?>
-
-    <?php
-    //trigger post dari button name=importdosen di halaman index.php
-    if (isset($_POST['importdosen'])) {
-        //$file merupakan variabel untuk menampung nama file yang di upload
-        $file = $_FILES['file']['name'];
-        //memisahkan ekstensi file yang di upload
-        $ekstensi = explode (".", $file);
-        //variabel file_name untuk merename file yang yang diupload dengan nama file roundmicrotime(tgl+jam+menit+detik+milidetik) + ekstensi
-        $file_name = "file".round(microtime(true)).".".end($ekstensi);
-        //$sumber mengambl nama file yang sudah diubah dengan round microtime secara temporer/temporary [temp_name]
-        $sumber = $_FILES['file']['tmp_name'];
-        //direktori untuk upload file
-        $target_dir ="template/";
-        //menentukan direktori file setelah diupload beserta nama file baru yang dimdifikasi dengan round microtime
-        $target_file = $target_dir.$file_name;
-        //upload file ke direktori atau folder "file-import"
-        $upload = move_uploaded_file($sumber, $target_file);
-        //load file excel yang telah diupload
-        $file_excel = PHPExcel_IOFactory::load($target_file);
-        $data_excel = $file_excel->getActiveSheet()->toArray(null, true,true,true);
-
-        for ($j=2; $j <= count($data_excel); $j++) {
-            $nidn          = $data_excel[$j]['B'];
-            $nama          = addslashes($data_excel[$j]['C']);
-            $nohp          = $data_excel[$j]['D'];
-            $kelamin       = $data_excel[$j]['E'];
-            $stat          = $data_excel[$j]['F'];
-            $pass          = sha1($nidn);
-            $st_pengguna   = '1';
-
-            $cekdosen = mysqli_query($conn, "SELECT nidn FROM tbl_dosen WHERE nidn='$nidn'") or die(mysqli_error($conn));
-            $rvd= mysqli_num_rows($cekdosen);
-            if($rvd>0){
-
-            } else{
-                $kosong = "";
-                $tambahdosen = mysqli_query($conn, "INSERT INTO tbl_dosen VALUES ('$nidn','$nama','$email','$kontak','$status')") or die(mysqli_error($conn));
-                $hapusdosenkosong = mysqli_query($conn, "DELETE FROM tbl_dosen WHERE nidn='$kosong'") or die(mysqli_error($conn));
-                $tambahpenggunadosen = mysqli_query($conn, "INSERT INTO tbl_pengguna VALUES ('$nidn','$pass','$nama','$st_pengguna')") or die(mysqli_error($conn));
-                $hapus_pg_dosenkosong = mysqli_query($conn, "DELETE FROM tbl_pengguna WHERE username='$kosong'") or die(mysqli_error($conn));
+            // 🔹 Update tbl_users (sinkron)
+            $q2 = mysqli_query($conn, "
+            UPDATE tbl_users
+            SET nama_lengkap = '$nama_dosen',
+                status = '$status_user'
+            WHERE username = '$nip'
+        ");
+            if (!$q2) {
+                throw new Exception(mysqli_error($conn));
             }
+
+            mysqli_commit($conn);
+
+            logAktivitas($conn, "Update data dosen NIP $nip");
+            header("Location: index.php?status=success");
+            exit;
+        } catch (Exception $e) {
+            mysqli_rollback($conn);
+            die("❌ Gagal update dosen: " . $e->getMessage());
         }
-        unlink($target_file);
-        ?>
-        <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
-        <script>
-            swal("Berhasil", "Semua data dosen berhasil di import", "success")
-            setTimeout(function(){
-                window.location.href = "../admin_master_dosen";
-            }, 1500);
-        </script>
-        <?php
     }
-    ?>
-</body>
-</html>
+
+    /* =====================================================
+   🔐 RESET PASSWORD DOSEN
+===================================================== */
+    if ($action === 'reset_password_dosen') {
+
+        $nip = mysqli_real_escape_string($conn, $_POST['nip']);
+        $password = password_hash($nip, PASSWORD_DEFAULT);
+
+        $q = mysqli_query($conn, "UPDATE tbl_users SET password = '$password' WHERE username = '$nip'");
+
+        if (!$q) {
+            die("Gagal reset password: " . mysqli_error($conn));
+        }
+
+        logAktivitas($conn, "Reset password dosen $nip");
+
+        // ✅ KEMBALI KE HALAMAN ADMIN DOSEN
+        header("Location: ../admin_dosen?reset=success");
+        exit;
+    }
+
+    /* =====================================================
+     🚫 NONAKTIF DOSEN
+  ===================================================== */ elseif ($action === 'nonaktif') {
+
+        if (!isset($_GET['nip'])) {
+            throw new Exception("NIP tidak ditemukan");
+        }
+
+        $nip = decriptData($_GET['nip']);
+
+        if (!$nip) {
+            throw new Exception("NIP tidak valid");
+        }
+
+        $nip = mysqli_real_escape_string($conn, $nip);
+
+        $q1 = mysqli_query(
+            $conn,
+            "UPDATE tbl_dosen SET aktif = 0 WHERE nip = '$nip'"
+        );
+
+        $q2 = mysqli_query(
+            $conn,
+            "UPDATE tbl_users SET status = 'nonaktif' WHERE username = '$nip'"
+        );
+
+        if (!$q1 || !$q2) {
+            throw new Exception(mysqli_error($conn));
+        }
+
+        logAktivitas($conn, "Menonaktifkan dosen $nip");
+    }
+
+    /* =====================================================
+     🗑️ HAPUS DOSEN
+  ===================================================== */ elseif ($action === 'hapus') {
+
+        $nip = decriptData($_GET['nip']);
+
+        mysqli_query($conn, "DELETE FROM tbl_users WHERE username='$nip'");
+        mysqli_query($conn, "DELETE FROM tbl_dosen WHERE nip='$nip'");
+
+        logAktivitas($conn, "Menghapus dosen $nip");
+    } else {
+        throw new Exception("Aksi tidak valid");
+    }
+
+    mysqli_commit($conn);
+    header("Location: ../admin_dosen?status=success");
+    exit;
+} catch (Exception $e) {
+    mysqli_rollback($conn);
+    header("Location: ../admin_dosen?status=error&msg=" . urlencode($e->getMessage()));
+    exit;
+}
