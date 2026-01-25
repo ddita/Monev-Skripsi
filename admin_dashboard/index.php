@@ -40,12 +40,28 @@ if ($_SESSION['role'] !== 'admin') {
 
 <?php
 // TOTAL MAHASISWA
-$qMhs = mysqli_query($conn, "SELECT COUNT(*) AS total FROM tbl_mahasiswa");
-$total_mhs = mysqli_fetch_assoc($qMhs)['total'];
+$qTotalMhs = mysqli_query($conn, "SELECT COUNT(*) AS total FROM tbl_mahasiswa");
+$total_mhs = mysqli_fetch_assoc($qTotalMhs)['total'];
+
+// MAHASISWA AKTIF
+$qMhsAktif = mysqli_query($conn, "SELECT COUNT(*) AS total FROM tbl_mahasiswa WHERE aktif = 1");
+$mhs_aktif = mysqli_fetch_assoc($qMhsAktif)['total'];
+
+// MAHASISWA NONAKTIF
+$qMhsNonaktif = mysqli_query($conn, "SELECT COUNT(*) AS total FROM tbl_mahasiswa WHERE aktif = 0");
+$mhs_nonaktif = mysqli_fetch_assoc($qMhsNonaktif)['total'];
 
 // TOTAL DOSEN
 $qDsn = mysqli_query($conn, "SELECT COUNT(*) AS total FROM tbl_dosen");
 $total_dsn = mysqli_fetch_assoc($qDsn)['total'];
+
+// DOSEN AKTIF
+$qDsnAktif = mysqli_query($conn, "SELECT COUNT(*) AS total FROM tbl_dosen WHERE aktif = 1");
+$dsn_aktif = mysqli_fetch_assoc($qDsnAktif)['total'];
+
+// MAHASISWA NONAKTIF
+$qDsnNonaktif = mysqli_query($conn, "SELECT COUNT(*) AS total FROM tbl_dosen WHERE aktif = 0");
+$dsn_nonaktif = mysqli_fetch_assoc($qDsnNonaktif)['total'];
 
 // MAHASISWA AKTIF SKRIPSI
 $qAktif = mysqli_query($conn, "SELECT COUNT(*) total FROM tbl_skripsi s
@@ -111,8 +127,14 @@ function encryptData($data)
 
 <?php
 /* ================= PROGRES CHART ================= */
-$qProgres = mysqli_query($conn, "SELECT st.status, COUNT(*) total FROM tbl_skripsi s
-  JOIN tbl_status st ON st.id = s.status_skripsi GROUP BY st.status");
+$qProgres = mysqli_query(
+  $conn,
+  "SELECT st.status, COUNT(*) AS total FROM tbl_skripsi s
+   JOIN tbl_status st ON st.id = s.status_skripsi
+   JOIN tbl_mahasiswa m ON m.nim = s.username
+   WHERE m.aktif = 1
+   GROUP BY st.status"
+);
 
 $labelProgres = [];
 $dataProgres  = [];
@@ -192,7 +214,7 @@ $rata_hari = round($dataRata['rata_hari'] ?? 0);
               <div class="card flex-fill">
                 <div class="card-header card-header-gradient">
                   <h3 class="card-title">
-                    <i class="fas fa-chart-pie"></i> Progres Skripsi
+                    <i class="fas fa-chart-bar"></i> Progres Skripsi
                   </h3>
                 </div>
                 <div class="card-body">
@@ -235,57 +257,75 @@ $rata_hari = round($dataRata['rata_hari'] ?? 0);
 
           <!-- ================= INFO BOX ================= -->
           <div class="row info-box-row">
+
             <!-- TOTAL MAHASISWA -->
-            <div class="col-lg-3 col-md-6">
-              <div class="small-box bg-gradient-blue">
-                <div class="inner">
-                  <h3><?= $total_mhs; ?></h3>
-                  <p>Total Mahasiswa</p>
+            <div class="col-lg-3 col-md-6 mb-3 d-flex">
+              <a href="../admin_mahasiswa" class="text-white w-100">
+                <div class="small-box bg-gradient-blue h-100">
+                  <div class="inner">
+                    <h3><?= $total_mhs; ?></h3>
+                    <p>Total Mahasiswa</p>
+                    <div class="d-flex justify-content-between mt-2 small">
+                      <span>Aktif: <?= $mhs_aktif; ?></span>
+                      <span>Nonaktif: <?= $mhs_nonaktif; ?></span>
+                    </div>
+                  </div>
+                  <div class="icon">
+                    <i class="fas fa-users"></i>
+                  </div>
                 </div>
-                <div class="icon">
-                  <i class="fas fa-users"></i>
-                </div>
-              </div>
+              </a>
             </div>
 
             <!-- TOTAL DOSEN -->
-            <div class="col-lg-3 col-md-6">
-              <div class="small-box bg-gradient-navy">
-                <div class="inner">
-                  <h3><?= $total_dsn; ?></h3>
-                  <p>Total Dosen</p>
+            <div class="col-lg-3 col-md-6 mb-3 d-flex">
+              <a href="../admin_dosen" class="text-white w-100">
+                <div class="small-box bg-gradient-navy h-100">
+                  <div class="inner">
+                    <h3><?= $total_dsn; ?></h3>
+                    <p>Total Dosen</p>
+                    <div class="d-flex justify-content-between mt-2 small">
+                      <span>Aktif: <?= $dsn_aktif; ?></span>
+                      <span>Nonaktif: <?= $dsn_nonaktif; ?></span>
+                    </div>
+                  </div>
+                  <div class="icon">
+                    <i class="fas fa-user-tie"></i>
+                  </div>
                 </div>
-                <div class="icon">
-                  <i class="fas fa-user-tie"></i>
-                </div>
-              </div>
+              </a>
             </div>
 
             <!-- AKTIF SKRIPSI -->
-            <div class="col-lg-3 col-md-6">
-              <div class="small-box bg-gradient-orange">
-                <div class="inner">
-                  <h3><?= $aktif; ?></h3>
-                  <p>Aktif Skripsi</p>
+            <div class="col-lg-3 col-md-6 mb-3 d-flex">
+              <a href="../admin_mahasiswa?progres=bimbingan" class="text-white w-100">
+                <div class="small-box bg-gradient-orange h-100">
+                  <div class="inner">
+                    <h3><?= $aktif; ?></h3>
+                    <p>Aktif Skripsi</p>
+                  </div>
+                  <div class="icon">
+                    <i class="fas fa-book"></i>
+                  </div>
                 </div>
-                <div class="icon">
-                  <i class="fas fa-book"></i>
-                </div>
-              </div>
+              </a>
             </div>
 
             <!-- SIAP SIDANG -->
-            <div class="col-lg-3 col-md-6">
-              <div class="small-box bg-gradient-blue">
-                <div class="inner">
-                  <h3><?= $siap_sidang; ?></h3>
-                  <p>Siap Sidang</p>
+            <div class="col-lg-3 col-md-6 mb-3 d-flex">
+              <a href="../admin_mahasiswa?progres=siap_sidang" class="text-white w-100">
+                <div class="small-box bg-gradient-blue h-100">
+                  <div class="inner">
+                    <h3><?= $siap_sidang; ?></h3>
+                    <p>Siap Sidang</p>
+                  </div>
+                  <div class="icon">
+                    <i class="fas fa-graduation-cap"></i>
+                  </div>
                 </div>
-                <div class="icon">
-                  <i class="fas fa-graduation-cap"></i>
-                </div>
-              </div>
+              </a>
             </div>
+
           </div>
 
           <?php
