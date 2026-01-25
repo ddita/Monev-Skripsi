@@ -54,10 +54,19 @@ function decriptData($data)
 $total_dosen_result = mysqli_query($conn, "SELECT COUNT(*) total FROM tbl_dosen");
 $total_dosen = $total_dosen_result ? mysqli_fetch_assoc($total_dosen_result)['total'] : 0;
 
-$dosen_aktif_result = mysqli_query($conn, "SELECT COUNT(DISTINCT dosen_pembimbing) total FROM tbl_mahasiswa WHERE dosen_pembimbing IS NOT NULL");
+$dosen_aktif_result = mysqli_query($conn, "SELECT COUNT(DISTINCT dosen_pembimbing) total FROM tbl_mahasiswa
+                      WHERE dosen_pembimbing IS NOT NULL
+                      AND aktif = 1
+                      AND status_skripsi != 6
+");
 $dosen_aktif = $dosen_aktif_result ? mysqli_fetch_assoc($dosen_aktif_result)['total'] : 0;
 
-$dosen_overload_result = mysqli_query($conn, "SELECT COUNT(*) total FROM (SELECT dosen_pembimbing FROM tbl_mahasiswa WHERE dosen_pembimbing IS NOT NULL GROUP BY dosen_pembimbing HAVING COUNT(*) > 8) x");
+$dosen_overload_result = mysqli_query($conn, "SELECT COUNT(*) total FROM (SELECT dosen_pembimbing FROM tbl_mahasiswa WHERE dosen_pembimbing IS NOT NULL
+                                              AND aktif = 1
+                                              AND status_skripsi != 6
+                                              GROUP BY dosen_pembimbing
+                                              HAVING COUNT(*) > 8) x
+");
 $dosen_overload = $dosen_overload_result ? mysqli_fetch_assoc($dosen_overload_result)['total'] : 0;
 // Tambahkan di admin_dosen, setelah query $dosen_overload
 $labelProgres = []; // Kosong karena tidak ada chart di halaman ini
@@ -186,6 +195,8 @@ $dataProgres = [];
 
                   $qDosen = mysqli_query($conn, "SELECT d.nip, d.nama_dosen, d.aktif, COUNT(m.nim) AS jumlah_mhs FROM tbl_dosen d
                             LEFT JOIN tbl_mahasiswa m ON m.dosen_pembimbing = d.nip
+                            AND m.aktif = 1
+                            AND m.status_skripsi != 6
                             GROUP BY d.nip, d.nama_dosen, d.aktif
                             ORDER BY d.nama_dosen ASC
                   ");

@@ -19,11 +19,7 @@ if ($_SESSION['role'] !== 'admin') {
 
   $ket = "Pengguna $usr ($nama) mencoba akses Master Dosen sebagai $role";
 
-  mysqli_query(
-    $conn,
-    "INSERT INTO tbl_cross_auth (username, waktu, keterangan)
-     VALUES ('$usr','$waktu','$ket')"
-  );
+  mysqli_query($conn,"INSERT INTO tbl_cross_auth (username, waktu, keterangan) VALUES ('$usr','$waktu','$ket')");
 
   header("Location: ../login/logout.php");
   exit;
@@ -71,9 +67,11 @@ $nipEnc = encriptData($dosen['nip']);
 
 /* ================= DATA MAHASISWA ================= */
 $qMhs = mysqli_query($conn, "SELECT m.nim, m.nama, m.prodi, s.judul FROM tbl_mahasiswa m
-        LEFT JOIN tbl_skripsi s ON s.username = m.nim
-        WHERE m.dosen_pembimbing = '$nip'
-        ORDER BY m.nama ASC
+          LEFT JOIN tbl_skripsi s ON s.username = m.nim
+          WHERE m.dosen_pembimbing = '$nip'
+          AND m.aktif = 1
+          AND m.status_skripsi != 6
+          ORDER BY m.nama ASC
 ");
 ?>
 
