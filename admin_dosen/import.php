@@ -1,81 +1,80 @@
-<!DOCTYPE html>
-<html>
-<head>
-	<meta charset="utf-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1">
-	<title> Admin Import Data </title>
-</head>
-<body>
 <?php
 require_once '../database/config.php';
-require '../lib/phpexcel-xls-library/vendor/phpoffice/phpexcel/Classes/PHPExcel.php';
+require __DIR__ . '/../vendor/autoload.php';
+
+use PhpOffice\PhpSpreadsheet\IOFactory;
+
 session_start();
-error_reporting(0);
+if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'admin') {
+	die("Hanya admin yang bisa akses");
+}
 
-//ambil trigger tombol importdosen
-if (isset($conn, $_POST['importdosen'])) {
-	//buat variabel untuk menampung value nama file dari elemen file pada index(modal import)
-	$file = $_FILES['file']['name'];
+if (!isset($_FILES['file_excel'])) {
+	die("File Excel harus diupload!");
+}
 
-	//buat variabel untuk memisahkan ekstensi file dengan nama filenya
-	$ekstensi = explode(".", $file);
+$file = $_FILES['file_excel']['tmp_name'];
+$spreadsheet = IOFactory::load($file);
+$sheet = $spreadsheet->getActiveSheet();
+$rows = $sheet->toArray();
 
-	//buat variabel untuk merename file dengan nama baru
-	$file_name = "file".round(microtime(true)).".".end($ekstensi);
+mysqli_begin_transaction($conn);
 
-	//buat variabel untuk menampung file temporary dari file yang diupload
-	$sumber = $_FILES['file']['tmp_name'];
+try {
 
-	//deklarasikan variabel direktori untuk mengupload file
-	$target_dir = "file-import/";
+	for ($i = 1; $i < count($rows); $i++) {
 
-	//buat variabel untuk mengarahkan file ke target direktori
-	$target_file = $target_dir.$file_name;
+		$row = $rows[$i];
 
-	//buat variabel yang berisikan perintah untuk mengupload file ke target direktori
-	$upload = move_uploaded_file($sumber, $target_file);
+		$nip        = trim($row[1]);
+		$nama_dosen = trim($row[2]);
+		$aktif      = strtolower(trim($row[3])) === 'aktif' ? 1 : 0;
+		$statusUser = $aktif ? 'aktif' : 'nonaktif';
+		$now        = date('Y-m-d H:i:s');
 
-	//identifikasi file ecel yang akan digunakan sebagai referensi import
-	$file_excel = PHPExcel_IOFactory::load($target_file);
+		if ($nip === '' || $nama_dosen === '') {
+			continue; // skip baris kosong
+		}
 
-	//identifikasi sheet pada excel yang sedang aktif
-	$data_excel = $file_excel->getActiveSheet()->toArray(null, true,true,true);
+		/* =========================
+       1️⃣ TBL_DOSEN
+    ========================= */
+		$cekDosen = mysqli_query($conn, "SELECT nip FROM tbl_dosen WHERE nip='$nip'");
 
-	for ($i=2; $i<= count($data_excel); $i++){
-		//deklarasi perulangan
-		$nidn     = $data_excel[$i]['B'];
-		$nama     = addslashes($data_excel[$i]['C']);
-		$email    = $data_excel[$i]['D'];
-		$kontak   = $data_excel[$i]['E'];
-		$status   = $data_excel[$i]['F'];
-		$pass     = sha1($nidn);
-		$st_dosen = "1";
-
-		$cekdosen = mysqli_query($conn, "SELECT nidn FROM tbl_dosen WHERE nidn='$nidn'") or die(mysqli_error($conn));
-
-		$rvd = mysqli_num_rows($cekdosen);
-
-		if($rvd>0){
-
+		if (mysqli_num_rows($cekDosen) > 0) {
+			$sqlDosen = "UPDATE tbl_dosen SET nama_dosen='$nama_dosen', aktif='$aktif' WHERE nip='$nip' ";
 		} else {
-			$kosong = "";
-			$tambahdosen = mysqli_query($conn, "INSERT INTO tbl_dosen VALUES ('$nidn', '$nama', '$email', '$kontak', '$status')") or die(mysqli_error($conn));
-			$delkosong = mysqli_query($conn, "DELETE FROM tbl_dosen WHERE nidn ='$kosong'") or die(mysqli_error($conn));
-			$tambahpenggunadosen = mysqli_query($conn, "INSERT INTO tbl_pengguna VALUES ('$nidn', '$pass', '$nama', '$st_dosen')") or die(mysqli_error($conn));
-			$delpenggunakosong = mysqli_query($conn, "DELETE FROM tbl_pengguna WHERE username ='$kosong'") or die(mysqli_error($conn));
+			$sqlDosen = "INSERT INTO tbl_dosen (nip, nama_dosen, aktif)
+        VALUES ('$nip','$nama_dosen','$aktif') ";
+		}
+
+		if (!mysqli_query($conn, $sqlDosen)) {
+			throw new Exception(mysqli_error($conn));
+		}
+
+		/* =========================
+       2️⃣ TBL_USERS
+    ========================= */
+		$cekUser = mysqli_query($conn, "SELECT id_user FROM tbl_users WHERE username='$nip'");
+
+		$password = sha1($nip);
+
+		if (mysqli_num_rows($cekUser) > 0) {
+			$sqlUser = "UPDATE tbl_users SET nama_lengkap='$nama_dosen', status='$statusUser' WHERE username='$nip' ";
+		} else {
+			$sqlUser = "INSERT INTO tbl_users (username, password, nama_lengkap, role, status, created_at)
+        VALUES ('$nip','$password','$nama_dosen','dosen','$statusUser','$now')";
+		}
+
+		if (!mysqli_query($conn, $sqlUser)) {
+			throw new Exception(mysqli_error($conn));
 		}
 	}
-	unlink($target_file);
-	?>
-	<script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
-	<script>
-		swal("Berhasil", "Semua data dosen berhasil di import", "success")
-		setTimeout(function(){
-			window.location.href = "../admin_master_dosen";
-		}, 1500);
-	</script>
-	<?php
+
+	mysqli_commit($conn);
+	header("Location: ../admin_dosen?status=success");
+	exit;
+} catch (Exception $e) {
+	mysqli_rollback($conn);
+	die("Gagal import dosen: " . $e->getMessage());
 }
-?>
-</body>
-</html>

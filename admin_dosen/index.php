@@ -266,7 +266,7 @@ $dataProgres = [];
                           <?php } ?>
 
                           <!-- HAPUS -->
-                          <a href="hapusdosen.php?nip=<?= encriptData($row['nip']); ?>"
+                          <a href="proses.php?action=hapus&nip=<?= encriptData($row['nip']); ?>"
                             class="btn btn-sm btn-dark"
                             onclick="return confirm('Hapus permanen data dosen?')"
                             title="Hapus">
@@ -288,7 +288,7 @@ $dataProgres = [];
       <!-- Modal Import -->
       <div class="modal fade" id="importModal" tabindex="-1" role="dialog" aria-labelledby="importModalLabel" aria-hidden="true">
         <div class="modal-dialog" role="document">
-          <form method="POST" enctype="multipart/form-data" action="prosesimport.php">
+          <form method="POST" enctype="multipart/form-data" action="import.php">
             <div class="modal-content">
               <div class="modal-header">
                 <h5 class="modal-title" id="importModalLabel">Import Data Dosen</h5>
