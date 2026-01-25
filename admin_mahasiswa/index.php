@@ -48,13 +48,25 @@ function decriptData($data)
   );
 }
 
+$filterProgres = $_GET['progres'] ?? null;
+
+$whereProgres = '';
+if ($filterProgres === 'bimbingan') {
+  $whereProgres = "AND LOWER(st.status) = 'bimbingan'";
+} elseif ($filterProgres === 'siap_sidang') {
+  $whereProgres = "AND LOWER(st.status) = 'siap sidang'";
+}
+
 /* ================= QUERY MAHASISWA ================= */
-$qMhs = mysqli_query($conn, "SELECT m.nim, m.nama, sk.judul, a.keterangan AS angkatan, COALESCE(st.status, 'Draft') AS status_skripsi, d.nama_dosen, m.aktif FROM tbl_mahasiswa m
-  LEFT JOIN tbl_skripsi sk ON sk.username = m.nim
-  LEFT JOIN tbl_status st ON st.id = sk.status_skripsi
-  LEFT JOIN tbl_angkatan a ON m.angkatan = a.kode_angkatan
-  LEFT JOIN tbl_dosen d ON m.dosen_pembimbing = d.nip
-  ORDER BY m.nama ASC") or die(mysqli_error($conn));
+$qMhs = mysqli_query($conn, "SELECT m.nim, m.nama, sk.judul, a.keterangan AS angkatan, COALESCE(st.status, 'Draft') AS status_skripsi, d.nama_dosen, m.aktif
+        FROM tbl_mahasiswa m
+        LEFT JOIN tbl_skripsi sk ON sk.username = m.nim
+        LEFT JOIN tbl_status st ON st.id = sk.status_skripsi
+        LEFT JOIN tbl_angkatan a ON m.angkatan = a.kode_angkatan
+        LEFT JOIN tbl_dosen d ON m.dosen_pembimbing = d.nip
+        WHERE 1=1 $whereProgres
+        ORDER BY m.nama ASC"
+) or die(mysqli_error($conn));
 ?>
 
 <!DOCTYPE html>
