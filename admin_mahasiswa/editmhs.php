@@ -94,6 +94,9 @@ if (!$mhs) {
             <!-- CONTENT -->
             <section class="content">
                 <div class="container-fluid">
+                    <a href="../admin_mahasiswa" class="btn btn-warning btn-sm mb-3">
+                        <i class="nav-icon fas fa-chevron-left"></i> Kembali
+                    </a>
                     <div class="row">
                         <div class="col-lg-6">
 

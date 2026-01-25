@@ -102,24 +102,31 @@ try {
      ✏️ EDIT MAHASISWA
   ===================================================== */ elseif ($action === 'edit') {
 
-    $nim              = $_POST['nim'];
-    $nama             = $_POST['nama'];
+    $nim              = trim($_POST['nim']);
+    $nama             = trim($_POST['nama']);
     $prodi            = $_POST['prodi'];
     $angkatan         = $_POST['angkatan'];
-    $status_skripsi   = $_POST['status_skripsi'];
+    $status_skripsi   = $_POST['status_skripsi']; // STRING / ENUM
     $dosen_pembimbing = $_POST['nip_dosen'];
-    $aktif            = $_POST['aktif'];
+    $aktif            = (int) $_POST['aktif'];
 
+    /* ================= UPDATE TBL_MAHASISWA ================= */
     $stmt = mysqli_prepare(
       $conn,
       "UPDATE tbl_mahasiswa SET
-       nama=?, prodi=?, angkatan=?, status_skripsi=?,
-       dosen_pembimbing=?, aktif=?, updated_at=NOW()
-       WHERE nim=?"
+      nama=?,
+      prodi=?,
+      angkatan=?,
+      status_skripsi=?,
+      dosen_pembimbing=?,
+      aktif=?,
+      updated_at=NOW()
+     WHERE nim=?"
     );
+
     mysqli_stmt_bind_param(
       $stmt,
-      "sssisis",
+      "sssssis",
       $nama,
       $prodi,
       $angkatan,
@@ -128,16 +135,19 @@ try {
       $aktif,
       $nim
     );
+
     mysqli_stmt_execute($stmt);
     mysqli_stmt_close($stmt);
 
-    // Update skripsi jika ada
+    /* ================= UPDATE TBL_SKRIPSI ================= */
     $stmt = mysqli_prepare(
       $conn,
-      "UPDATE tbl_skripsi SET status_skripsi=?, updated_at=NOW()
-       WHERE username=?"
+      "UPDATE tbl_skripsi
+     SET status_skripsi=?, updated_at=NOW()
+     WHERE username=?"
     );
-    mysqli_stmt_bind_param($stmt, "is", $status_skripsi, $nim);
+
+    mysqli_stmt_bind_param($stmt, "ss", $status_skripsi, $nim);
     mysqli_stmt_execute($stmt);
     mysqli_stmt_close($stmt);
 
