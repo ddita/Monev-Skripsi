@@ -227,21 +227,20 @@ $dataProgres = [];
                         $rowClass = '';
                       }
                   ?>
-                      <tr class="<?= $rowClass ?>">
+                      <tr class="<?= $row['aktif'] == 0 ? 'row-nonaktif' : '' ?>">
                         <td class="text-center"><?= $no++ ?></td>
                         <td><b><?= htmlspecialchars($row['nip']) ?></b></td>
-                        <td><?= htmlspecialchars($row['nama_dosen']) ?></td>
+                        <td>
+                          <?= htmlspecialchars($row['nama_dosen']) ?>
+                          <?php if ($row['aktif'] == 0): ?>
+                            <small class="text-muted">(nonaktif)</small>
+                          <?php endif; ?>
+                        </td>
                         <td class="text-center"><?= $jml ?></td>
                         <td class="text-center">
                           <span class="badge badge-<?= $badge ?>"><?= $label ?></span>
                         </td>
                         <td class="text-center">
-                          <!-- EDIT -->
-                          <a href="editdosen.php?nip=<?= encriptData($row['nip']); ?>"
-                            class="btn btn-sm btn-warning"
-                            title="Edit Data">
-                            <i class="fas fa-edit"></i>
-                          </a>
 
                           <!-- DETAIL -->
                           <a href="detaildosen.php?nip=<?= encriptData($row['nip']); ?>"
@@ -257,21 +256,31 @@ $dataProgres = [];
                             <i class="fas fa-users"></i>
                           </a>
 
-                          <!-- NONAKTIFKAN -->
-                          <?php if ($row['aktif'] == 1) { ?>
-                            <a href="prosesnonaktif.php?nim=<?= encriptData($row['nip']); ?>" class="btn btn-sm btn-danger"
-                              onclick="return confirm('Nonaktifkan dosen ini?')" title="Nonaktifkan">
+                          <?php if ($row['aktif'] == 1): ?>
+                            <!-- EDIT (HANYA JIKA AKTIF) -->
+                            <a href="editdosen.php?nip=<?= encriptData($row['nip']); ?>"
+                              class="btn btn-sm btn-warning"
+                              title="Edit Data">
+                              <i class="fas fa-edit"></i>
+                            </a>
+
+                            <!-- NONAKTIFKAN (HANYA JIKA AKTIF) -->
+                            <a href="proses.php?action=nonaktif&nip=<?= encriptData($row['nip']); ?>"
+                              class="btn btn-sm btn-danger"
+                              onclick="return confirm('Nonaktifkan dosen ini?')"
+                              title="Nonaktifkan">
                               <i class="fas fa-user-slash"></i>
                             </a>
-                          <?php } ?>
+                          <?php endif; ?>
 
-                          <!-- HAPUS -->
+                          <!-- HAPUS (SELALU TAMPIL) -->
                           <a href="proses.php?action=hapus&nip=<?= encriptData($row['nip']); ?>"
                             class="btn btn-sm btn-dark"
                             onclick="return confirm('Hapus permanen data dosen?')"
                             title="Hapus">
                             <i class="fas fa-trash"></i>
                           </a>
+
                         </td>
                       </tr>
                   <?php

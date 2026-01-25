@@ -1,37 +1,182 @@
+<?php
+session_start();
+$konstruktor = 'admin_dosen';
+require_once '../database/config.php';
+
+/* ================= CEK LOGIN ================= */
+if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'admin') {
+    header("Location: ../login/logout.php");
+    exit;
+}
+
+/* ================= DEKRIP ================= */
+function decriptData($data)
+{
+    $key = 'monev_skripsi_2024';
+    return openssl_decrypt(
+        base64_decode(urldecode($data)),
+        'AES-128-ECB',
+        $key
+    );
+}
+
+if (!isset($_GET['nip'])) {
+    die('NIP tidak ditemukan');
+}
+
+$nip_enkripsi = $_GET['nip'];
+$nip = decriptData($nip_enkripsi);
+
+if (!$nip) {
+    die('NIP tidak valid');
+}
+
+$nip = mysqli_real_escape_string($conn, $nip);
+
+
+/* ================= AMBIL DATA DOSEN ================= */
+$qDosen = mysqli_query($conn, "SELECT d.nip, d.nama_dosen, d.aktif, u.status AS status_user FROM tbl_dosen d
+    LEFT JOIN tbl_users u ON u.username = d.nip WHERE d.nip = '$nip'
+");
+$dosen = mysqli_fetch_assoc($qDosen);
+
+if (!$dosen) {
+    die('Data dosen tidak ditemukan');
+}
+
+/* ================= HITUNG BEBAN ================= */
+$qBeban = mysqli_query($conn, "SELECT COUNT(*) total FROM tbl_mahasiswa WHERE dosen_pembimbing='$nip'
+            AND aktif=1
+            AND status_skripsi != 6
+");
+$beban = mysqli_fetch_assoc($qBeban)['total'];
+
+if ($beban > 8) {
+    $label = 'Overload';
+    $badge = 'danger';
+} elseif ($beban >= 6) {
+    $label = 'Padat';
+    $badge = 'warning';
+} else {
+    $label = 'Normal';
+    $badge = 'success';
+}
+?>
+
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="utf-8">
     <title>Edit Dosen</title>
+    <?php include '../mhs_listlink.php'; ?>
+    <script>
+        (function() {
+            const theme = localStorage.getItem("theme") || "dark";
+            document.documentElement.classList.add(theme + "-mode");
+        })();
+    </script>
 </head>
 
-<body>
-    <?php
-    require_once '../database/config.php';
+<body class="hold-transition sidebar-mini">
+    <div class="wrapper">
+        <?php include '../mhs_navbar.php'; ?>
+        <?php include '../admin_sidebar.php'; ?>
+        <!-- Preloader -->
+        <div class="preloader flex-column justify-content-center align-items-center">
+            <img class="animation__shake" src="../images/UP.png" alt="Monev-Skripsi" height="60" width="60">
+        </div>
 
-    if (isset($_POST['editdosen'])) {
-        $nidn = $_POST['nidn'];
-        $nama = $_POST['nama'];
-        $email = $_POST['email'];
-        $kontak = $_POST['kontak'];
-        $status = $_POST['status'];
+        <div class="content-wrapper">
+            <section class="content-header">
+                <div class="container-fluid">
+                    <h1>Edit Data Dosen</h1>
+                </div>
+            </section>
 
-        $query = "UPDATE tbl_dosen SET nama='$nama', email='$email', kontak='$kontak', status='$status' WHERE nidn='$nidn'";
+            <section class="content">
+                <div class="container-fluid">
+                    <div class="row">
 
-        if (mysqli_query($conn, $query)) {
-            echo '<script>alert("Data berhasil diperbarui");
-            window.location.href="../admin_master_dosen";
-              </script>';
-        } else {
-            echo '<script>
-                alert("Data gagal diperbarui");
-                window.location.href="../admin_master_dosen";
-              </script>';
-        }
-    }
-    ?>
+                        <!-- FORM EDIT -->
+                        <div class="col-lg-6">
+                            <div class="card card-warning">
+                                <div class="card-header">
+                                    <h3 class="card-title"><i class="fas fa-edit"></i> Form Edit Dosen</h3>
+                                </div>
 
+                                <form method="post" action="proses.php">
+                                    <div class="card-body">
+                                        <input type="hidden" name="action" value="update_dosen">
+                                        <input type="hidden" name="nip" value="<?= $dosen['nip']; ?>">
+
+                                        <div class="form-group">
+                                            <label>Nama Dosen</label>
+                                            <input type="text" name="nama_dosen" class="form-control"
+                                                value="<?= htmlspecialchars($dosen['nama_dosen']); ?>" required>
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label>Status Dosen</label>
+                                            <select name="aktif" class="form-control" required>
+                                                <option value="1" <?= $dosen['aktif'] == 1 ? 'selected' : ''; ?>>Aktif</option>
+                                                <option value="0" <?= $dosen['aktif'] == 0 ? 'selected' : ''; ?>>Nonaktif</option>
+                                            </select>
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label>Status User</label>
+                                            <select name="status_user" class="form-control" required>
+                                                <option value="aktif" <?= $dosen['status_user'] == 'aktif' ? 'selected' : ''; ?>>
+                                                    Aktif
+                                                </option>
+                                                <option value="nonaktif" <?= $dosen['status_user'] == 'nonaktif' ? 'selected' : ''; ?>>
+                                                    Nonaktif
+                                                </option>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <div class="card-footer">
+                                        <button type="submit" name="editmhs" class="btn btn-warning btn-block">
+                                            <i class="fas fa-save"></i> Simpan Perubahan
+                                        </button>
+                                        <a href="../admin_dosen" class="btn btn-secondary btn-block">Batal</a>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+
+                        <!-- INFO BEBAN -->
+                        <div class="col-md-5">
+                            <div class="card">
+                                <div class="card-body text-center">
+                                    <h5>Beban Bimbingan</h5>
+                                    <h1><?= $beban ?></h1>
+                                    <span class="badge badge-<?= $badge ?>"><?= $label ?></span>
+                                    <hr>
+
+                                    <form method="POST" action="proses.php"
+                                        onsubmit="return confirm('Reset password dosen ini?')">
+                                        <input type="hidden" name="action" value="reset_password_dosen">
+                                        <input type="hidden" name="nip" value="<?= $dosen['nip'] ?>">
+                                        <button class="btn btn-danger btn-sm">
+                                            <i class="fas fa-key"></i> Reset Password
+                                        </button>
+                                    </form>
+
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <?php include '../footer.php'; ?>
+    </div>
+    <?php include '../mhs_script.php'; ?>
 </body>
+
 </html>
