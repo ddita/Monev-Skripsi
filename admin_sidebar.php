@@ -25,9 +25,9 @@ if ($username !== '') {
 
 // daftar halaman manajemen pengguna
 $manajemenPages = [
-  'admin_manajemen_mahasiswa',
-  'admin_manajemen_dosen',
-  'admin_manajemen_admin'
+  'admin_mahasiswa',
+  'admin_dosen',
+  'admin_administrator'
 ];
 
 $isManajemenOpen = in_array($konstruktor, $manajemenPages);
@@ -90,8 +90,8 @@ $isManajemenOpen = in_array($konstruktor, $manajemenPages);
 
             <!-- ADMINISTRATOR -->
             <li class="nav-item">
-              <a href="../admin_manajemen_admin"
-                class="nav-link <?= $konstruktor == 'admin_manajemen_admin' ? 'active' : ''; ?>">
+              <a href="../admin_administrator"
+                class="nav-link <?= $konstruktor == 'admin_administrator' ? 'active' : ''; ?>">
                 <i class="far fa-circle nav-icon"></i>
                 <p>Administrator</p>
               </a>
