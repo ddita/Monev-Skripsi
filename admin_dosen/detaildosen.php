@@ -47,11 +47,7 @@ if (!$nip) {
 }
 
 /* ================= DATA DOSEN ================= */
-$qDosen = mysqli_query($conn, "
-  SELECT 
-    d.nip,
-    d.nama_dosen,
-    d.aktif AS status_dosen,
+$qDosen = mysqli_query($conn, "SELECT d.nip, d.nama_dosen, d.aktif AS status_dosen,
     CASE 
       WHEN u.status IS NULL THEN 'nonaktif'
       ELSE u.status
@@ -67,19 +63,15 @@ if (!$dosen) {
 }
 
 /* ================= TOTAL MAHASISWA ================= */
-$qTotal = mysqli_query($conn, "
-  SELECT COUNT(*) AS total
-  FROM tbl_mahasiswa m
-  LEFT JOIN tbl_skripsi s
-    ON s.username = m.nim
-   AND s.id_skripsi = (
+$qTotal = mysqli_query($conn, "SELECT COUNT(*) AS total FROM tbl_mahasiswa m
+  LEFT JOIN tbl_skripsi s ON s.username = m.nim AND s.id_skripsi = (
       SELECT MAX(s2.id_skripsi)
       FROM tbl_skripsi s2
       WHERE s2.username = m.nim
    )
   WHERE m.dosen_pembimbing = '$nip'
     AND m.aktif = 1
-    AND (s.status_skripsi IS NULL OR s.status_skripsi != 'lulus')
+    AND (s.id_status IS NULL OR s.id_status != 'lulus')
 ");
 
 $totalMhs = mysqli_fetch_assoc($qTotal)['total'];
@@ -94,36 +86,11 @@ if ($totalMhs <= 5) {
 }
 
 /* ================= DATA MAHASISWA ================= */
-$qMhs = mysqli_query($conn, "
-    SELECT 
-        m.nim,
-        m.nama,
-        m.prodi,
-        m.angkatan,
-
-        s.judul,
-        COALESCE(s.status_skripsi, 'belum') AS status_skripsi,
-
-        p.nama_periode
-
-    FROM tbl_mahasiswa m
-
-    LEFT JOIN tbl_skripsi s 
-        ON s.username = m.nim
-       AND s.id_skripsi = (
-            SELECT MAX(s2.id_skripsi)
-            FROM tbl_skripsi s2
-            WHERE s2.username = m.nim
-       )
-
-    LEFT JOIN tbl_periode p 
-        ON p.id_periode = s.id_periode
-
-    WHERE m.dosen_pembimbing = '$nip'
-      AND m.aktif = 1
-      AND (s.status_skripsi IS NULL OR s.status_skripsi != 'lulus')
-
-    ORDER BY m.nama ASC
+$qMhs = mysqli_query($conn, "SELECT m.nim,m.nama,m.prodi,m.angkatan,s.judul,
+        COALESCE(s.id_status, 'belum') AS id_status,p.nama_periode FROM tbl_mahasiswa m
+        LEFT JOIN tbl_skripsi s ON s.username = m.nim AND s.id_skripsi = (SELECT MAX(s2.id_skripsi) FROM tbl_skripsi s2 WHERE s2.username = m.nim)
+        LEFT JOIN tbl_periode p ON p.id_periode = s.id_periode WHERE m.dosen_pembimbing = '$nip' AND m.aktif = 1 AND (s.id_status IS NULL OR s.id_status != 'lulus')
+        ORDER BY m.nama ASC
 ");
 ?>
 
@@ -247,7 +214,7 @@ $qMhs = mysqli_query($conn, "
                       <td><?= $m['judul'] ?? '<em>Belum ada</em>' ?></td>
                       <td class="text-center">
                         <?php
-                        $status = strtolower(trim($m['status_skripsi']));
+                        $status = strtolower(trim($m['id_status']));
                         $badgeMap = [
                           'draft'             => 'secondary',
                           'bimbingan'         => 'warning',
