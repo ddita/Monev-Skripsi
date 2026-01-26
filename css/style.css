@@ -286,3 +286,13 @@ body.light-mode .preloader img {
 .light-mode .preloader {
   background-color: #f4f6f9 !important;
 }
+
+/* Samakan tinggi semua info box */
+.small-box {
+  min-height: 150px;
+}
+
+/* Hilangkan underline link */
+.small-box a {
+  text-decoration: none;
+}
