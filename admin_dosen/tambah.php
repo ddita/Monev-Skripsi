@@ -57,13 +57,26 @@ if ($_SESSION['role'] !== 'admin') {
       <div class="content-wrapper">
         <section class="content-header">
           <div class="container-fluid">
-            <h1>Tambah Dosen</h1>
+            <div class="row mb-2">
+              <div class="col-sm-6">
+                <h1>Tambah Dosen</h1>
+              </div>
+              <div class="col-sm-6">
+                <ol class="breadcrumb float-sm-right">
+                  <li class="breadcrumb-item"><a href="../admin_dashboard">Dashboard</a></li>
+                  <li class="breadcrumb-item"><a href="../admin_dosen">Dosen</a></li>
+                  <li class="breadcrumb-item active">Tambah</li>
+                </ol>
+              </div>
+            </div>
           </div>
         </section>
 
         <section class="content">
           <div class="container-fluid">
-
+            <a href="../admin_dosen" class="btn btn-warning btn-sm mb-3">
+              <i class="nav-icon fas fa-chevron-left"></i> Kembali
+            </a>
             <div class="card card-primary">
               <div class="card-header">
                 <h3 class="card-title"><i class="fas fa-user-tie"></i> Form Dosen</h3>

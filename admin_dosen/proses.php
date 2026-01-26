@@ -142,36 +142,57 @@ try {
     }
 
     /* =====================================================
-     🚫 NONAKTIF DOSEN
-  ===================================================== */ elseif ($action === 'nonaktif') {
+ 🔁 TOGGLE AKTIF / NONAKTIF DOSEN
+===================================================== */ elseif ($action === 'toggle') {
 
         if (!isset($_GET['nip'])) {
             throw new Exception("NIP tidak ditemukan");
         }
 
         $nip = decriptData($_GET['nip']);
-
         if (!$nip) {
             throw new Exception("NIP tidak valid");
         }
 
         $nip = mysqli_real_escape_string($conn, $nip);
 
+        // 🔎 Ambil status saat ini
+        $q = mysqli_query($conn, "SELECT aktif FROM tbl_dosen WHERE nip='$nip'");
+        if (!$q || mysqli_num_rows($q) == 0) {
+            throw new Exception("Data dosen tidak ditemukan");
+        }
+
+        $row = mysqli_fetch_assoc($q);
+        $aktif_sekarang = (int)$row['aktif'];
+
+        // 🔄 Toggle status
+        if ($aktif_sekarang === 1) {
+            $aktif_baru  = 0;
+            $status_user = 'nonaktif';
+            $log = "Menonaktifkan dosen $nip";
+        } else {
+            $aktif_baru  = 1;
+            $status_user = 'aktif';
+            $log = "Mengaktifkan kembali dosen $nip";
+        }
+
+        // 🔹 Update tbl_dosen
         $q1 = mysqli_query(
             $conn,
-            "UPDATE tbl_dosen SET aktif = 0 WHERE nip = '$nip'"
+            "UPDATE tbl_dosen SET aktif='$aktif_baru' WHERE nip='$nip'"
         );
 
+        // 🔹 Update tbl_users
         $q2 = mysqli_query(
             $conn,
-            "UPDATE tbl_users SET status = 'nonaktif' WHERE username = '$nip'"
+            "UPDATE tbl_users SET status='$status_user' WHERE username='$nip'"
         );
 
         if (!$q1 || !$q2) {
             throw new Exception(mysqli_error($conn));
         }
 
-        logAktivitas($conn, "Menonaktifkan dosen $nip");
+        logAktivitas($conn, $log);
     }
 
     /* =====================================================

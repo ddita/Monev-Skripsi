@@ -264,12 +264,20 @@ $dataProgres = [];
                               <i class="fas fa-edit"></i>
                             </a>
 
-                            <!-- NONAKTIFKAN (HANYA JIKA AKTIF) -->
-                            <a href="proses.php?action=nonaktif&nip=<?= encriptData($row['nip']); ?>"
+                            <!-- NONAKTIFKAN -->
+                            <a href="proses.php?action=toggle&nip=<?= encriptData($row['nip']); ?>"
                               class="btn btn-sm btn-danger"
                               onclick="return confirm('Nonaktifkan dosen ini?')"
                               title="Nonaktifkan">
                               <i class="fas fa-user-slash"></i>
+                            </a>
+                          <?php else: ?>
+                            <!-- AKTIFKAN -->
+                            <a href="proses.php?action=toggle&nip=<?= encriptData($row['nip']); ?>"
+                              class="btn btn-sm btn-success"
+                              onclick="return confirm('Aktifkan kembali dosen ini?')"
+                              title="Aktifkan">
+                              <i class="fas fa-user-check"></i>
                             </a>
                           <?php endif; ?>
 
