@@ -64,13 +64,14 @@ $qDsnNonaktif = mysqli_query($conn, "SELECT COUNT(*) AS total FROM tbl_dosen WHE
 $dsn_nonaktif = mysqli_fetch_assoc($qDsnNonaktif)['total'];
 
 // MAHASISWA AKTIF SKRIPSI
-$qAktif = mysqli_query($conn, "SELECT COUNT(*) total FROM tbl_skripsi s
-  JOIN tbl_status st ON st.id = s.status_skripsi WHERE LOWER(st.status) = 'bimbingan'");
+$qAktif = mysqli_query($conn, "SELECT COUNT(*) AS total FROM tbl_skripsi s
+  JOIN tbl_status st ON st.id = s.id_status WHERE LOWER(st.status) = 'bimbingan'
+");
 $aktif = mysqli_fetch_assoc($qAktif)['total'];
 
 // SIAP SIDANG
 $qSidang = mysqli_query($conn, "SELECT COUNT(*) total FROM tbl_skripsi s
-  JOIN tbl_status st ON st.id = s.status_skripsi WHERE LOWER(st.status) = 'siap sidang'");
+  JOIN tbl_status st ON st.id = s.id_status WHERE LOWER(st.status) = 'siap sidang'");
 $siap_sidang = mysqli_fetch_assoc($qSidang)['total'];
 ?>
 
@@ -130,7 +131,7 @@ function encryptData($data)
 $qProgres = mysqli_query(
   $conn,
   "SELECT st.status, COUNT(*) AS total FROM tbl_skripsi s
-   JOIN tbl_status st ON st.id = s.status_skripsi
+   JOIN tbl_status st ON st.id = s.id_status
    JOIN tbl_mahasiswa m ON m.nim = s.username
    WHERE m.aktif = 1
    GROUP BY st.status"
@@ -148,7 +149,8 @@ while ($p = mysqli_fetch_assoc($qProgres)) {
 $total_terlambat = mysqli_fetch_assoc(mysqli_query($conn, "SELECT COUNT(*) total FROM tbl_skripsi WHERE DATEDIFF(NOW(), updated_at) > 14"))['total'];
 
 /* ================= RATA-RATA PENYELESAIAN ================= */
-$qRata = mysqli_query($conn, "SELECT AVG(DATEDIFF(updated_at, created_at)) rata_hari FROM tbl_skripsi WHERE status_skripsi='lulus'");
+$qRata = mysqli_query($conn, "SELECT AVG(DATEDIFF(s.updated_at, s.created_at)) AS rata_hari FROM tbl_skripsi s
+  JOIN tbl_status st ON s.id_status = st.id WHERE st.status = 'Lulus'");
 
 $dataRata  = mysqli_fetch_assoc($qRata);
 $rata_hari = round($dataRata['rata_hari'] ?? 0);
@@ -331,13 +333,13 @@ $rata_hari = round($dataRata['rata_hari'] ?? 0);
           <?php
           // AKTIVITAS SKRIPSI TERAKHIR
           $qAktivitas = mysqli_query($conn, "SELECT s.id_skripsi, s.username, m.nama AS nama_mahasiswa, d.nip AS nip_dosen, d.nama_dosen, st.status AS status_skripsi, s.updated_at, DATEDIFF(NOW(), s.updated_at) AS selisih_hari
-                  FROM tbl_skripsi s
-                  JOIN tbl_mahasiswa m ON m.nim = s.username
-                  LEFT JOIN tbl_dosen d ON d.nip = m.dosen_pembimbing
-                  JOIN tbl_status st ON st.id = s.status_skripsi
-                  ORDER BY s.updated_at DESC
-                  LIMIT 5
-                  ");
+            FROM tbl_skripsi s
+            JOIN tbl_mahasiswa m ON m.nim = s.username
+            LEFT JOIN tbl_dosen d ON d.nip = m.dosen_pembimbing
+            JOIN tbl_status st ON st.id = s.id_status
+            ORDER BY s.updated_at DESC
+            LIMIT 10
+          ");
           ?>
 
           <!-- AKTIVITAS -->

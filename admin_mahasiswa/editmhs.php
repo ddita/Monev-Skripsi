@@ -140,14 +140,31 @@ if (!$mhs) {
                                         <!-- STATUS SKRIPSI -->
                                         <div class="form-group">
                                             <label>Status Skripsi</label>
-                                            <select name="status_skripsi" class="form-control" required>
+                                            <select name="id_status" class="form-control" required>
                                                 <?php
-                                                $qStatus = mysqli_query($conn, "SELECT * FROM tbl_status");
+                                                $qStatus = mysqli_query(
+                                                    $conn,
+                                                    "SELECT * FROM tbl_status ORDER BY id ASC"
+                                                );
+
                                                 while ($s = mysqli_fetch_assoc($qStatus)) {
-                                                    $sel = ($s['id'] == $mhs['status_skripsi']) ? 'selected' : '';
-                                                    echo "<option value='{$s['id']}' $sel>
-                                                        {$s['status']}
-                                                      </option>";
+                                                    $sel = ($s['id'] == $mhs['id_status']) ? 'selected' : '';
+                                                    echo "<option value='{$s['id']}' $sel>{$s['status']}</option>";
+                                                }
+                                                ?>
+                                            </select>
+                                        </div>
+
+                                        <!-- PERIODE AKADEDMIK -->
+                                        <div class="form-group">
+                                            <label>Periode Akademik</label>
+                                            <select name="id_periode" class="form-control" required>
+                                                <?php
+                                                $qPeriode = mysqli_query($conn, "SELECT * FROM tbl_periode ORDER BY id_periode DESC");
+                                                while ($p = mysqli_fetch_assoc($qPeriode)) {
+                                                    $sel = ($p['id_periode'] == $mhs['id_periode']) ? 'selected' : '';
+                                                    echo "<option value='{$p['id_periode']}' $sel>
+                                                    {$p['nama_periode']}</option>";
                                                 }
                                                 ?>
                                             </select>

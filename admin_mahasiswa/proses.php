@@ -40,15 +40,14 @@ try {
      ➕ TAMBAH MAHASISWA
   ===================================================== */
   if ($action === 'tambah') {
-
-    $nim            = trim($_POST['nim']);
-    $nama           = trim($_POST['nama']);
-    $prodi          = $_POST['prodi'];
-    $angkatan       = $_POST['angkatan'];
-    $status_skripsi = (int) $_POST['status_skripsi'];
-    $nip_dosen      = $_POST['nip_dosen'];
-    $judul          = trim($_POST['judul']);
-    $id_periode     = (int) $_POST['id_periode'];
+    $nim        = trim($_POST['nim']);
+    $nama       = trim($_POST['nama']);
+    $prodi      = $_POST['prodi'];
+    $angkatan   = $_POST['angkatan'];
+    $id_status  = (int) $_POST['id_status'];
+    $nip_dosen  = $_POST['nip_dosen'];
+    $judul      = trim($_POST['judul']);
+    $id_periode = (int) $_POST['id_periode'];
 
     // Cek duplikat
     $cek = mysqli_prepare($conn, "SELECT nim FROM tbl_mahasiswa WHERE nim=?");
@@ -64,21 +63,34 @@ try {
     // Insert mahasiswa
     $stmt = mysqli_prepare(
       $conn,
-      "INSERT INTO tbl_mahasiswa
-      (nim,nama,prodi,angkatan,status_skripsi,dosen_pembimbing,aktif,created_at,updated_at)
-      VALUES (?,?,?,?,?,?,1,NOW(),NOW())"
+      "INSERT INTO tbl_mahasiswa (nim,nama,prodi,angkatan,status_skripsi,dosen_pembimbing,aktif,created_at,updated_at,id_periode)
+    VALUES (?,?,?,?,?,?,1,NOW(),NOW(),?)"
     );
-    mysqli_stmt_bind_param($stmt, "sssiss", $nim, $nama, $prodi, $angkatan, $status_skripsi, $nip_dosen);
+
+    mysqli_stmt_bind_param(
+      $stmt,
+      "ssssisi",
+      $nim,            // s
+      $nama,           // s
+      $prodi,          // s
+      $angkatan,       // s
+      $id_status,      // i  ← dari tbl_status.id
+      $nip_dosen,      // s
+      $id_periode      // i  ← dari tbl_periode.id_periode
+    );
+
     mysqli_stmt_execute($stmt);
     mysqli_stmt_close($stmt);
 
     // Insert user
     $password = sha1($nim);
+
     $stmt = mysqli_prepare(
       $conn,
       "INSERT INTO tbl_users (username,password,nama_lengkap,role,status,created_at)
-       VALUES (?,?,?,'mahasiswa','aktif',NOW())"
+    VALUES (?,?,?,'mahasiswa','aktif',NOW())"
     );
+
     mysqli_stmt_bind_param($stmt, "sss", $nim, $password, $nama);
     mysqli_stmt_execute($stmt);
     $id_user = mysqli_insert_id($conn);
@@ -87,11 +99,20 @@ try {
     // Insert skripsi
     $stmt = mysqli_prepare(
       $conn,
-      "INSERT INTO tbl_skripsi
-      (id_user,username,judul,status_skripsi,id_periode,created_at,updated_at)
-      VALUES (?,?,?,?,?,NOW(),NOW())"
+      "INSERT INTO tbl_skripsi (id_user,username,judul,id_status,id_periode,created_at,updated_at)
+    VALUES (?,?,?,?,?,NOW(),NOW())"
     );
-    mysqli_stmt_bind_param($stmt, "issii", $id_user, $nim, $judul, $status_skripsi, $id_periode);
+
+    mysqli_stmt_bind_param(
+      $stmt,
+      "issii",
+      $id_user,
+      $nim,
+      $judul,
+      $id_status,
+      $id_periode
+    );
+
     mysqli_stmt_execute($stmt);
     mysqli_stmt_close($stmt);
 
@@ -103,10 +124,10 @@ try {
   ===================================================== */ elseif ($action === 'edit') {
 
     $nim              = trim($_POST['nim']);
-    $nama             = trim($_POST['nama']);
     $prodi            = $_POST['prodi'];
     $angkatan         = $_POST['angkatan'];
-    $status_skripsi   = $_POST['status_skripsi']; // STRING / ENUM
+    $id_status        = (int) $_POST['id_status'];
+    $id_periode       = (int) $_POST['id_periode'];
     $dosen_pembimbing = $_POST['nip_dosen'];
     $aktif            = (int) $_POST['aktif'];
 
@@ -114,24 +135,24 @@ try {
     $stmt = mysqli_prepare(
       $conn,
       "UPDATE tbl_mahasiswa SET
-      nama=?,
-      prodi=?,
-      angkatan=?,
-      status_skripsi=?,
-      dosen_pembimbing=?,
-      aktif=?,
-      updated_at=NOW()
-     WHERE nim=?"
+    prodi=?,
+    angkatan=?,
+    id_status=?,
+    dosen_pembimbing=?,
+    id_periode=?,
+    aktif=?,
+    updated_at=NOW()
+   WHERE nim=?"
     );
 
     mysqli_stmt_bind_param(
       $stmt,
-      "sssssis",
-      $nama,
+      "ssisiis",
       $prodi,
       $angkatan,
-      $status_skripsi,
+      $id_status,
       $dosen_pembimbing,
+      $id_periode,
       $aktif,
       $nim
     );
@@ -142,12 +163,21 @@ try {
     /* ================= UPDATE TBL_SKRIPSI ================= */
     $stmt = mysqli_prepare(
       $conn,
-      "UPDATE tbl_skripsi
-     SET status_skripsi=?, updated_at=NOW()
-     WHERE username=?"
+      "UPDATE tbl_skripsi SET
+    id_status=?,
+    id_periode=?,
+    updated_at=NOW()
+   WHERE username=?"
     );
 
-    mysqli_stmt_bind_param($stmt, "ss", $status_skripsi, $nim);
+    mysqli_stmt_bind_param(
+      $stmt,
+      "iis",
+      $id_status,
+      $id_periode,
+      $nim
+    );
+
     mysqli_stmt_execute($stmt);
     mysqli_stmt_close($stmt);
 
@@ -155,15 +185,57 @@ try {
   }
 
   /* =====================================================
-     🚫 NONAKTIF MAHASISWA
-  ===================================================== */ elseif ($action === 'nonaktif') {
+ 🔁 TOGGLE AKTIF / NONAKTIF MAHASISWA
+===================================================== */ elseif ($action === 'toggle') {
+
+    if (!isset($_GET['nim'])) {
+      throw new Exception("NIM tidak ditemukan");
+    }
 
     $nim = decriptData($_GET['nim']);
+    if (!$nim) {
+      throw new Exception("NIM tidak valid");
+    }
 
-    mysqli_query($conn, "UPDATE tbl_mahasiswa SET aktif=0 WHERE nim='$nim'");
-    mysqli_query($conn, "UPDATE tbl_users SET status='nonaktif' WHERE username='$nim'");
+    $nim = mysqli_real_escape_string($conn, $nim);
 
-    logAktivitas($conn, "Menonaktifkan mahasiswa $nim");
+    // 🔎 Ambil status saat ini
+    $q = mysqli_query($conn, "SELECT aktif FROM tbl_mahasiswa WHERE nim='$nim'");
+    if (!$q || mysqli_num_rows($q) == 0) {
+      throw new Exception("Data mahasiswa tidak ditemukan");
+    }
+
+    $row = mysqli_fetch_assoc($q);
+    $aktif_sekarang = (int)$row['aktif'];
+
+    // 🔄 Toggle status
+    if ($aktif_sekarang === 1) {
+      $aktif_baru  = 0;
+      $status_user = 'nonaktif';
+      $log = "Menonaktifkan mahasiswa $nim";
+    } else {
+      $aktif_baru  = 1;
+      $status_user = 'aktif';
+      $log = "Mengaktifkan kembali mahasiswa $nim";
+    }
+
+    // 🔹 Update tbl_mahasiswa
+    $q1 = mysqli_query(
+      $conn,
+      "UPDATE tbl_mahasiswa SET aktif='$aktif_baru' WHERE nim='$nim'"
+    );
+
+    // 🔹 Update tbl_users
+    $q2 = mysqli_query(
+      $conn,
+      "UPDATE tbl_users SET status='$status_user' WHERE username='$nim'"
+    );
+
+    if (!$q1 || !$q2) {
+      throw new Exception(mysqli_error($conn));
+    }
+
+    logAktivitas($conn, $log);
   }
 
   /* =====================================================

@@ -60,31 +60,77 @@ if (empty($nim)) {
         </div>";
   exit;
 }
-
-$q = mysqli_query($conn, "SELECT 
+$q = mysqli_query($conn, "
+  SELECT 
     m.nim,
     m.nama,
     m.aktif,
     p.nama_prodi,
     a.keterangan AS angkatan,
     d.nama_dosen AS pembimbing,
+
     s.id_skripsi,
     s.judul,
     s.created_at,
     s.updated_at,
+
     st.status,
+
     pr.nama_periode,
-    pr.tahun_akademik,
-    pr.semester
+    pr.semester,
+
+    ta.tahun_akademik
+
   FROM tbl_mahasiswa m
-  LEFT JOIN tbl_prodi p ON m.prodi = p.kode_prodi
-  LEFT JOIN tbl_angkatan a ON m.angkatan = a.kode_angkatan
-  LEFT JOIN tbl_dosen d ON m.dosen_pembimbing = d.nip
-  LEFT JOIN tbl_skripsi s ON m.nim = s.username
-  LEFT JOIN tbl_status st ON s.status_skripsi = st.id
-  LEFT JOIN tbl_periode pr ON s.id_periode = pr.id_periode
+
+  LEFT JOIN tbl_prodi p 
+    ON m.prodi = p.kode_prodi
+
+  LEFT JOIN tbl_angkatan a 
+    ON m.angkatan = a.kode_angkatan
+
+  LEFT JOIN tbl_dosen d 
+    ON m.dosen_pembimbing = d.nip
+
+  LEFT JOIN tbl_skripsi s 
+    ON m.nim = s.username
+
+  LEFT JOIN tbl_status st 
+    ON m.id_status = st.id
+
+  LEFT JOIN tbl_periode pr 
+    ON m.id_periode = pr.id_periode
+
+  LEFT JOIN tbl_tahun_akademik ta 
+    ON pr.id_tahun = ta.id_tahun
+
   WHERE m.nim = '$nim'
 ") or die(mysqli_error($conn));
+
+// $q = mysqli_query($conn, "SELECT 
+//     m.nim,
+//     m.nama,
+//     m.aktif,
+//     p.nama_prodi,
+//     a.keterangan AS angkatan,
+//     d.nama_dosen AS pembimbing,
+//     s.id_skripsi,
+//     s.judul,
+//     s.created_at,
+//     s.updated_at,
+//     st.status,
+//     pr.nama_periode,
+//     pr.tahun_akademik,
+//     pr.semester
+//   FROM tbl_mahasiswa m
+//   LEFT JOIN tbl_prodi p ON m.prodi = p.kode_prodi
+//   LEFT JOIN tbl_angkatan a ON m.angkatan = a.kode_angkatan
+//   LEFT JOIN tbl_dosen d ON m.dosen_pembimbing = d.nip
+//   LEFT JOIN tbl_skripsi s ON m.nim = s.username
+//   LEFT JOIN tbl_status st ON s.status_skripsi = st.id
+//   LEFT JOIN tbl_periode pr ON s.id_periode = pr.id_periode
+//   WHERE m.nim = '$nim'
+// ") or die(mysqli_error($conn));
 
 
 if (mysqli_num_rows($q) == 0) {
@@ -101,7 +147,7 @@ $data = mysqli_fetch_assoc($q);
 $progressMap = [
   'Draft'  => 0,
   'Bimbingan' => 20,
-  'Seminar' => 40,
+  'Seminar Proposal' => 40,
   'Revisi'   => 60,
   'Siap Sidang'    => 80,
   'Lulus'    => 100
@@ -156,10 +202,11 @@ $progress = $progressMap[$data['status'] ?? ''] ?? 0;
 
       <!-- CONTENT -->
       <section class="content">
-        <a href="../admin_mahasiswa" class="btn btn-warning btn-sm mb-3">
-          <i class="nav-icon fas fa-chevron-left"></i> Kembali
-        </a>
+
         <div class="container-fluid">
+          <a href="../admin_mahasiswa" class="btn btn-warning btn-sm mb-3">
+            <i class="nav-icon fas fa-chevron-left"></i> Kembali
+          </a>
           <div class="row">
             <!-- ================= KOLOM KIRI ================= -->
             <div class="col-lg-6 col-md-12">
@@ -174,12 +221,14 @@ $progress = $progressMap[$data['status'] ?? ''] ?? 0;
                   $badge = 'secondary';
                   if ($data['status'] == 'Lulus') $badge = 'success';
                   elseif ($data['status'] == 'Bimbingan') $badge = 'warning';
-                  elseif ($data['status'] == 'Seminar') $badge = 'info';
+                  elseif ($data['status'] == 'Seminar Proposal') $badge = 'info';
                   elseif ($data['status'] == 'Revisi') $badge = 'danger';
                   elseif ($data['status'] == 'Siap Sidang') $badge = 'primary';
                   ?>
                   <span class="badge badge-<?= $badge ?>">
-                    <?= $data['status'] ?? 'Belum Mengajukan'; ?>
+                    <?=
+                    $data['status'] ?? 'Belum Mengajukan';
+                    ?>
                   </span>
 
                   <table class="table table-sm table-borderless mt-2">

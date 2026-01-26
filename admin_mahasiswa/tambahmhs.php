@@ -173,10 +173,10 @@ if ($_SESSION['role'] !== 'admin') {
 
                           <div class="form-group">
                             <label>Status Skripsi</label>
-                            <select name="status_skripsi" class="form-control" required>
+                            <select name="id_status" class="form-control" required>
                               <option value="" selected disabled>--- Pilih Status Skripsi ---</option>
                               <?php
-                              $q = mysqli_query($conn, "SELECT * FROM tbl_status");
+                              $q = mysqli_query($conn, "SELECT id, status FROM tbl_status");
                               while ($s = mysqli_fetch_assoc($q)) {
                                 echo "<option value='{$s['id']}'>{$s['status']}</option>";
                               }
