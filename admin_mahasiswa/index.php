@@ -58,7 +58,9 @@ if ($filterProgres === 'bimbingan') {
 }
 
 /* ================= QUERY MAHASISWA ================= */
-$qMhs = mysqli_query($conn,"SELECT m.nim, m.nama, sk.judul, a.keterangan AS angkatan, COALESCE(st.status, 'Draft') AS status_skripsi, d.nama_dosen, m.aktif FROM tbl_mahasiswa m
+$qMhs = mysqli_query(
+  $conn,
+  "SELECT m.nim, m.nama, sk.judul, a.keterangan AS angkatan, COALESCE(st.status, 'Draft') AS status_skripsi, d.nama_dosen, m.aktif FROM tbl_mahasiswa m
     LEFT JOIN tbl_skripsi sk ON sk.username = m.nim
     LEFT JOIN tbl_status st ON st.id = sk.id_status
     LEFT JOIN tbl_angkatan a ON m.angkatan = a.kode_angkatan
@@ -271,6 +273,27 @@ $qMhs = mysqli_query($conn,"SELECT m.nim, m.nama, sk.judul, a.keterangan AS angk
     <?php include '../footer.php'; ?>
   </div>
   <?php include '../mhs_script.php'; ?>
+  <?php if (isset($_SESSION['alert_success'])): ?>
+    <script>
+      Swal.fire({
+        icon: 'success',
+        title: 'Berhasil',
+        html: '<?= $_SESSION['alert_success']; ?>'
+      });
+    </script>
+  <?php unset($_SESSION['alert_success']);
+  endif; ?>
+
+  <?php if (isset($_SESSION['alert_warning'])): ?>
+    <script>
+      Swal.fire({
+        icon: 'warning',
+        title: 'Perhatian',
+        html: '<?= $_SESSION['alert_warning']; ?>'
+      });
+    </script>
+  <?php unset($_SESSION['alert_warning']);
+  endif; ?>
 
 </body>
 

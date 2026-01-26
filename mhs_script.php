@@ -204,3 +204,5 @@
     document.querySelector(".preloader").style.display = "none";
   });
 </script>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
