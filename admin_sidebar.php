@@ -88,12 +88,63 @@ $isManajemenOpen = in_array($konstruktor, $manajemenPages);
               </a>
             </li>
 
-            <!-- ADMINISTRATOR -->
+          </ul>
+        </li>
+
+        <!-- MANAJEMEN AKADEMIK -->
+        <li class="nav-item <?= $isManajemenOpen ? 'menu-open' : ''; ?>">
+          <a href="#" class="nav-link <?= $isManajemenOpen ? 'active' : ''; ?>">
+            <i class="nav-icon fas fa-university"></i>
+            <p>
+              Manajemen Akademik
+              <i class="right fas fa-angle-left"></i>
+            </p>
+          </a>
+
+          <ul class="nav nav-treeview">
+
+            <!-- MANAJEMEN TAHUN AKADEMIK -->
             <li class="nav-item">
-              <a href="../admin_administrator"
-                class="nav-link <?= $konstruktor == 'admin_administrator' ? 'active' : ''; ?>">
+              <a href="../admin_akademik"
+                class="nav-link <?= $konstruktor == 'admin_akademik' ? 'active' : ''; ?>">
                 <i class="far fa-circle nav-icon"></i>
-                <p>Administrator</p>
+                <p>Tahun Akademik</p>
+              </a>
+            </li>
+
+            <!-- MANAJEMEN PERIODE -->
+            <li class="nav-item">
+              <a href="../admin_periode"
+                class="nav-link <?= $konstruktor == 'admin_periode' ? 'active' : ''; ?>">
+                <i class="far fa-circle nav-icon"></i>
+                <p>Periode</p>
+              </a>
+            </li>
+
+            <!-- MANAJEMEN PRODI -->
+            <li class="nav-item">
+              <a href="../admin_prodi"
+                class="nav-link <?= $konstruktor == 'admin_prodi' ? 'active' : ''; ?>">
+                <i class="far fa-circle nav-icon"></i>
+                <p>Program Studi</p>
+              </a>
+            </li>
+
+            <!-- KONSETNRASI BIDANG SKRIPSI -->
+            <li class="nav-item">
+              <a href="../admin_konsentrasi"
+                class="nav-link <?= $konstruktor == 'admin_konsentrasi' ? 'active' : ''; ?>">
+                <i class="far fa-circle nav-icon"></i>
+                <p>Bidang Skripsi</p>
+              </a>
+            </li>
+
+            <!-- BUKU PANDUAN SKRIPSI -->
+            <li class="nav-item">
+              <a href="../admin_panduan"
+                class="nav-link <?= $konstruktor == 'admin_panduan' ? 'active' : ''; ?>">
+                <i class="far fa-circle nav-icon"></i>
+                <p>Dokumen & Template</p>
               </a>
             </li>
 
