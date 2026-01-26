@@ -236,7 +236,7 @@ $qMhs = mysqli_query($conn, "
                       <td><?= $m['judul'] ?? '<em>Belum ada</em>' ?></td>
                       <td class="text-center">
                         <?php
-                        $status = $m['status_skripsi'];
+                        $status = strtolower(trim($m['status_skripsi']));
                         $badgeMap = [
                           'draft'             => 'secondary',
                           'bimbingan'         => 'warning',

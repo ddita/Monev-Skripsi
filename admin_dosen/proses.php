@@ -142,27 +142,6 @@ try {
     }
 
     /* =====================================================
-   🔐 RESET PASSWORD DOSEN
-===================================================== */
-    if ($action === 'reset_password_dosen') {
-
-        $nip = mysqli_real_escape_string($conn, $_POST['nip']);
-        $password = password_hash($nip, PASSWORD_DEFAULT);
-
-        $q = mysqli_query($conn, "UPDATE tbl_users SET password = '$password' WHERE username = '$nip'");
-
-        if (!$q) {
-            die("Gagal reset password: " . mysqli_error($conn));
-        }
-
-        logAktivitas($conn, "Reset password dosen $nip");
-
-        // ✅ KEMBALI KE HALAMAN ADMIN DOSEN
-        header("Location: ../admin_dosen?reset=success");
-        exit;
-    }
-
-    /* =====================================================
      🚫 NONAKTIF DOSEN
   ===================================================== */ elseif ($action === 'nonaktif') {
 

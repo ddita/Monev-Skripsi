@@ -96,6 +96,9 @@ if ($beban > 8) {
 
             <section class="content">
                 <div class="container-fluid">
+                    <a href="../admin_dosen" class="btn btn-warning btn-sm mb-3">
+                        <i class="nav-icon fas fa-chevron-left"></i> Kembali
+                    </a>
                     <div class="row">
 
                         <!-- FORM EDIT -->
@@ -155,16 +158,6 @@ if ($beban > 8) {
                                     <h1><?= $beban ?></h1>
                                     <span class="badge badge-<?= $badge ?>"><?= $label ?></span>
                                     <hr>
-
-                                    <form method="POST" action="proses.php"
-                                        onsubmit="return confirm('Reset password dosen ini?')">
-                                        <input type="hidden" name="action" value="reset_password_dosen">
-                                        <input type="hidden" name="nip" value="<?= $dosen['nip'] ?>">
-                                        <button class="btn btn-danger btn-sm">
-                                            <i class="fas fa-key"></i> Reset Password
-                                        </button>
-                                    </form>
-
                                 </div>
                             </div>
                         </div>
