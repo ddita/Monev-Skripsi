@@ -153,7 +153,18 @@ $qMhs = mysqli_query($conn, "
     <div class="content-wrapper">
       <section class="content-header">
         <div class="container-fluid">
-          <h1>Detail Dosen</h1>
+          <div class="row mb-2">
+            <div class="col-sm-6">
+              <h1>Detail Dosen</h1>
+            </div>
+            <div class="col-sm-6">
+              <ol class="breadcrumb float-sm-right">
+                <li class="breadcrumb-item"><a href="../admin_dashboard">Dashboard</a></li>
+                <li class="breadcrumb-item"><a href="../admin_dosen">Dosen</a></li>
+                <li class="breadcrumb-item active">Detail Dosen</li>
+              </ol>
+            </div>
+          </div>
         </div>
       </section>
 
