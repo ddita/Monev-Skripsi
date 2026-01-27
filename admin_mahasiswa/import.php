@@ -42,7 +42,7 @@ try {
 
   $id_periode = mysqli_fetch_assoc($qPeriode)['id_periode'];
 
-  // 🔁 LOOP DATA EXCEL
+  // LOOP DATA EXCEL
   for ($i = 1; $i < count($rows); $i++) {
 
     $row = $rows[$i];
@@ -59,7 +59,7 @@ try {
 
     if ($nim == '' || $nama == '') continue;
 
-    // 🚫 CEK DUPLIKAT
+    // CEK DUPLIKAT
     $cekDuplikat = mysqli_query(
       $conn,
       "SELECT nim FROM tbl_mahasiswa WHERE nim='$nim' AND nama='$nama'"

@@ -329,6 +329,27 @@ $dataProgres = [];
     <?php include '../footer.php'; ?>
   </div>
   <?php include '../mhs_script.php'; ?>
+  <?php if (isset($_SESSION['alert_success'])): ?>
+    <script>
+      Swal.fire({
+        icon: 'success',
+        title: 'Berhasil',
+        html: '<?= $_SESSION['alert_success']; ?>'
+      });
+    </script>
+  <?php unset($_SESSION['alert_success']);
+  endif; ?>
+
+  <?php if (isset($_SESSION['alert_warning'])): ?>
+    <script>
+      Swal.fire({
+        icon: 'warning',
+        title: 'Perhatian',
+        html: '<?= $_SESSION['alert_warning']; ?>'
+      });
+    </script>
+  <?php unset($_SESSION['alert_warning']);
+  endif; ?>
 
 </body>
 

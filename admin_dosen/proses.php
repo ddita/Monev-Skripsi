@@ -97,7 +97,7 @@ try {
     /* =====================================================
    ✏️ UPDATE DOSEN (FINAL VERSION)
 ===================================================== */
-    if ($action === 'update_dosen') {
+    else if ($action === 'update_dosen') {
 
         $nip         = mysqli_real_escape_string($conn, $_POST['nip']);
         $nama_dosen  = mysqli_real_escape_string($conn, trim($_POST['nama_dosen']));

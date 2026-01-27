@@ -17,6 +17,8 @@ $file = $_FILES['file_excel']['tmp_name'];
 $spreadsheet = IOFactory::load($file);
 $sheet = $spreadsheet->getActiveSheet();
 $rows = $sheet->toArray();
+$duplikat = [];
+$berhasil = 0;
 
 mysqli_begin_transaction($conn);
 
@@ -32,8 +34,18 @@ try {
 		$statusUser = $aktif ? 'aktif' : 'nonaktif';
 		$now        = date('Y-m-d H:i:s');
 
-		if ($nip === '' || $nama_dosen === '') {
-			continue; // skip baris kosong
+		if ($nip == '' || $nama_dosen == '') continue;
+
+		// CEK DUPLIKAT
+		$cekDuplikat = mysqli_query($conn, "SELECT nip FROM tbl_dosen WHERE nip='$nip' AND nama_dosen='$nama_dosen'");
+
+		if (!$cekDuplikat) {
+			throw new Exception(mysqli_error($conn));
+		}
+
+		if (mysqli_num_rows($cekDuplikat) > 0) {
+			$duplikat[] = "$nip - $nama_dosen (duplikat)";
+			continue;
 		}
 
 		/* =========================
@@ -44,8 +56,7 @@ try {
 		if (mysqli_num_rows($cekDosen) > 0) {
 			$sqlDosen = "UPDATE tbl_dosen SET nama_dosen='$nama_dosen', aktif='$aktif' WHERE nip='$nip' ";
 		} else {
-			$sqlDosen = "INSERT INTO tbl_dosen (nip, nama_dosen, aktif)
-        VALUES ('$nip','$nama_dosen','$aktif') ";
+			$sqlDosen = "INSERT INTO tbl_dosen (nip, nama_dosen, aktif) VALUES ('$nip','$nama_dosen','$aktif') ";
 		}
 
 		if (!mysqli_query($conn, $sqlDosen)) {
@@ -69,12 +80,23 @@ try {
 		if (!mysqli_query($conn, $sqlUser)) {
 			throw new Exception(mysqli_error($conn));
 		}
+		$berhasil++; // ✅ DATA VALID
 	}
 
 	mysqli_commit($conn);
-	header("Location: ../admin_dosen?status=success");
-	exit;
+
+	if (!empty($duplikat)) {
+		$_SESSION['alert_warning'] =
+			"Import selesai, beberapa data dilewati:<br>" .
+			implode("<br>", $duplikat);
+	}
+
+	$_SESSION['alert_success'] =
+		"Import berhasil 🎉<br>Total data berhasil diproses: <b>$berhasil</b>";
 } catch (Exception $e) {
 	mysqli_rollback($conn);
-	die("Gagal import dosen: " . $e->getMessage());
+	$_SESSION['alert_warning'] = "Import gagal ❌<br>" . $e->getMessage();
 }
+
+header("Location: ../admin_dosen");
+exit;
