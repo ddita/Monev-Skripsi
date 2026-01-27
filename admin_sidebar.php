@@ -141,8 +141,7 @@ if ($isUserManajemenOpen) {
 
             <!-- MANAJEMEN PRODI -->
             <li class="nav-item">
-              <a href="../admin_prodi"
-                class="nav-link <?= $konstruktor == 'admin_prodi' ? 'active' : ''; ?>">
+              <a href="../admin_prodi" class="nav-link <?= $konstruktor == 'admin_prodi' ? 'active' : ''; ?>">
                 <i class="far fa-circle nav-icon"></i>
                 <p>Program Studi</p>
               </a>
