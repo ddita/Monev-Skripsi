@@ -17,7 +17,7 @@ if ($_SESSION['role'] !== 'admin') {
   $role  = $_SESSION['role'] ?? '-';
   $waktu = date('Y-m-d H:i:s');
 
-  $ket = "Pengguna $usr ($nama) mencoba akses Master Mahasiswa sebagai $role";
+  $ket = "Pengguna $usr ($nama) mencoba akses Manajemen Mahasiswa sebagai $role";
 
   mysqli_query(
     $conn,

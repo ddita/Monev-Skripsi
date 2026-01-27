@@ -46,9 +46,7 @@ mysqli_begin_transaction($conn);
 
 try {
 
-    /* =====================================================
-   ➕ TAMBAH DOSEN
-===================================================== */
+    /* ================== TAMBAH DOSEN ================== */
     if ($action === 'tambah_dosen') {
 
         $nip        = trim($_POST['nip']);
@@ -70,18 +68,13 @@ try {
         mysqli_stmt_close($cek);
 
         /* === INSERT tbl_dosen === */
-        $stmt = mysqli_prepare(
-            $conn,
-            "INSERT INTO tbl_dosen (nip, nama_dosen, aktif)
-     VALUES (?, ?, 1)"
-        );
+        $stmt = mysqli_prepare($conn, "INSERT INTO tbl_dosen (nip, nama_dosen, aktif) VALUES (?, ?, 1)");
         mysqli_stmt_bind_param($stmt, "ss", $nip, $nama_dosen);
         mysqli_stmt_execute($stmt);
         mysqli_stmt_close($stmt);
 
         /* === INSERT tbl_users === */
         $password = sha1($nip);
-
         $stmt = mysqli_prepare(
             $conn,
             "INSERT INTO tbl_users (username, password, nama_lengkap, role, status, created_at)
@@ -94,38 +87,25 @@ try {
         logAktivitas($conn, "Menambahkan dosen $nip");
     }
 
-    /* =====================================================
-   ✏️ UPDATE DOSEN (FINAL VERSION)
-===================================================== */
+    /* ================== UPDATE DOSEN ================== */
     else if ($action === 'update_dosen') {
 
         $nip         = mysqli_real_escape_string($conn, $_POST['nip']);
         $nama_dosen  = mysqli_real_escape_string($conn, trim($_POST['nama_dosen']));
         $status_user = mysqli_real_escape_string($conn, $_POST['status_user']);
-        $aktif       = (int) $_POST['aktif']; // ⬅️ PASTI ADA (dari select)
+        $aktif       = (int) $_POST['aktif'];
 
         mysqli_begin_transaction($conn);
 
         try {
-
             // 🔹 Update tbl_dosen
-            $q1 = mysqli_query($conn, "
-            UPDATE tbl_dosen
-            SET nama_dosen = '$nama_dosen',
-                aktif = '$aktif'
-            WHERE nip = '$nip'
-        ");
+            $q1 = mysqli_query($conn, "UPDATE tbl_dosen SET nama_dosen = '$nama_dosen',aktif = '$aktif' WHERE nip = '$nip'");
             if (!$q1) {
                 throw new Exception(mysqli_error($conn));
             }
 
             // 🔹 Update tbl_users (sinkron)
-            $q2 = mysqli_query($conn, "
-            UPDATE tbl_users
-            SET nama_lengkap = '$nama_dosen',
-                status = '$status_user'
-            WHERE username = '$nip'
-        ");
+            $q2 = mysqli_query($conn, "UPDATE tbl_users SET nama_lengkap = '$nama_dosen',status = '$status_user' WHERE username = '$nip'");
             if (!$q2) {
                 throw new Exception(mysqli_error($conn));
             }
@@ -141,9 +121,8 @@ try {
         }
     }
 
-    /* =====================================================
- 🔁 TOGGLE AKTIF / NONAKTIF DOSEN
-===================================================== */ elseif ($action === 'toggle') {
+    /* ================== TOGGLE AKTIF / NONAKTIF DOSEN ================== */
+    elseif ($action === 'toggle') {
 
         if (!isset($_GET['nip'])) {
             throw new Exception("NIP tidak ditemukan");
@@ -156,7 +135,7 @@ try {
 
         $nip = mysqli_real_escape_string($conn, $nip);
 
-        // 🔎 Ambil status saat ini
+        // Ambil status saat ini
         $q = mysqli_query($conn, "SELECT aktif FROM tbl_dosen WHERE nip='$nip'");
         if (!$q || mysqli_num_rows($q) == 0) {
             throw new Exception("Data dosen tidak ditemukan");
@@ -165,7 +144,7 @@ try {
         $row = mysqli_fetch_assoc($q);
         $aktif_sekarang = (int)$row['aktif'];
 
-        // 🔄 Toggle status
+        // Toggle status
         if ($aktif_sekarang === 1) {
             $aktif_baru  = 0;
             $status_user = 'nonaktif';
@@ -176,17 +155,11 @@ try {
             $log = "Mengaktifkan kembali dosen $nip";
         }
 
-        // 🔹 Update tbl_dosen
-        $q1 = mysqli_query(
-            $conn,
-            "UPDATE tbl_dosen SET aktif='$aktif_baru' WHERE nip='$nip'"
-        );
+        // Update tbl_dosen
+        $q1 = mysqli_query($conn,"UPDATE tbl_dosen SET aktif='$aktif_baru' WHERE nip='$nip'");
 
-        // 🔹 Update tbl_users
-        $q2 = mysqli_query(
-            $conn,
-            "UPDATE tbl_users SET status='$status_user' WHERE username='$nip'"
-        );
+        // Update tbl_users
+        $q2 = mysqli_query($conn,"UPDATE tbl_users SET status='$status_user' WHERE username='$nip'");
 
         if (!$q1 || !$q2) {
             throw new Exception(mysqli_error($conn));
@@ -195,9 +168,8 @@ try {
         logAktivitas($conn, $log);
     }
 
-    /* =====================================================
-     🗑️ HAPUS DOSEN
-  ===================================================== */ elseif ($action === 'hapus') {
+    /* ================== HAPUS DOSEN ================== */
+    elseif ($action === 'hapus') {
 
         $nip = decriptData($_GET['nip']);
 

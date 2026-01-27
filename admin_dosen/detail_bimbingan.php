@@ -17,7 +17,7 @@ if ($_SESSION['role'] !== 'admin') {
   $role  = $_SESSION['role'] ?? '-';
   $waktu = date('Y-m-d H:i:s');
 
-  $ket = "Pengguna $usr ($nama) mencoba akses Master Dosen sebagai $role";
+  $ket = "Pengguna $usr ($nama) mencoba akses Manajemen Dosen sebagai $role";
 
   mysqli_query($conn, "INSERT INTO tbl_cross_auth (username, waktu, keterangan) VALUES ('$usr','$waktu','$ket')");
 
@@ -54,11 +54,7 @@ $nip = decriptData($_GET['nip']);
 if (!$nip) die('Data rusak');
 
 /* ================= DATA DOSEN ================= */
-$qDosen = mysqli_query($conn, "
-  SELECT nip, nama_dosen 
-  FROM tbl_dosen 
-  WHERE nip='$nip'
-");
+$qDosen = mysqli_query($conn, "SELECT nip, nama_dosen FROM tbl_dosen WHERE nip='$nip'");
 $dosen = mysqli_fetch_assoc($qDosen);
 if (!$dosen) die('Dosen tidak ditemukan');
 
@@ -67,8 +63,7 @@ $nipEnc = encriptData($dosen['nip']);
 
 /* ================= DATA MAHASISWA ================= */
 $qMhs = mysqli_query($conn, "SELECT m.nim, m.nama, m.prodi, s.judul FROM tbl_mahasiswa m
-          LEFT JOIN tbl_skripsi s ON s.username = m.nim
-          WHERE m.dosen_pembimbing = '$nip'
+          LEFT JOIN tbl_skripsi s ON s.username = m.nim WHERE m.dosen_pembimbing = '$nip'
           AND m.aktif = 1
           AND m.id_status != 6
           ORDER BY m.nama ASC

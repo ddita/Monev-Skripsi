@@ -48,9 +48,7 @@ try {
 			continue;
 		}
 
-		/* =========================
-       1️⃣ TBL_DOSEN
-    ========================= */
+		/* ========================= TBL_DOSEN ========================= */
 		$cekDosen = mysqli_query($conn, "SELECT nip FROM tbl_dosen WHERE nip='$nip'");
 
 		if (mysqli_num_rows($cekDosen) > 0) {
@@ -63,9 +61,7 @@ try {
 			throw new Exception(mysqli_error($conn));
 		}
 
-		/* =========================
-       2️⃣ TBL_USERS
-    ========================= */
+		/* ========================= TBL_USERS ========================= */
 		$cekUser = mysqli_query($conn, "SELECT id_user FROM tbl_users WHERE username='$nip'");
 
 		$password = sha1($nip);
@@ -80,7 +76,7 @@ try {
 		if (!mysqli_query($conn, $sqlUser)) {
 			throw new Exception(mysqli_error($conn));
 		}
-		$berhasil++; // ✅ DATA VALID
+		$berhasil++;
 	}
 
 	mysqli_commit($conn);

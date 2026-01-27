@@ -1,6 +1,6 @@
 <?php
 session_start();
-$konstruktor = 'admin_mahasiswa';
+$konstruktor = 'admin_dosen';
 require_once '../database/config.php';
 
 /* ================= CEK LOGIN ================= */
@@ -17,7 +17,7 @@ if ($_SESSION['role'] !== 'admin') {
   $role  = $_SESSION['role'] ?? '-';
   $waktu = date('Y-m-d H:i:s');
 
-  $ket = "Pengguna $usr ($nama) mencoba akses Detail Skripsi sebagai $role";
+  $ket = "Pengguna $usr ($nama) mencoba akses Manajemen Dosen sebagai $role";
 
   mysqli_query(
     $conn,
@@ -49,12 +49,9 @@ if (!$nip) {
 /* ================= DATA DOSEN ================= */
 $qDosen = mysqli_query($conn, "SELECT d.nip, d.nama_dosen, d.aktif AS status_dosen,
     CASE 
-      WHEN u.status IS NULL THEN 'nonaktif'
-      ELSE u.status
-    END AS status_user
-  FROM tbl_dosen d
-  LEFT JOIN tbl_users u ON u.username = d.nip
-  WHERE d.nip = '$nip'
+      WHEN u.status IS NULL THEN 'nonaktif' ELSE u.status
+    END AS status_user FROM tbl_dosen d
+  LEFT JOIN tbl_users u ON u.username = d.nip WHERE d.nip = '$nip'
 ");
 
 $dosen = mysqli_fetch_assoc($qDosen);
@@ -64,14 +61,10 @@ if (!$dosen) {
 
 /* ================= TOTAL MAHASISWA ================= */
 $qTotal = mysqli_query($conn, "SELECT COUNT(*) AS total FROM tbl_mahasiswa m
-  LEFT JOIN tbl_skripsi s ON s.username = m.nim AND s.id_skripsi = (
-      SELECT MAX(s2.id_skripsi)
-      FROM tbl_skripsi s2
-      WHERE s2.username = m.nim
-   )
+  LEFT JOIN tbl_skripsi s ON s.username = m.nim AND s.id_skripsi = (SELECT MAX(s2.id_skripsi) FROM tbl_skripsi s2 WHERE s2.username = m.nim)
   WHERE m.dosen_pembimbing = '$nip'
-    AND m.aktif = 1
-    AND (s.id_status IS NULL OR s.id_status != 'lulus')
+  AND m.aktif = 1
+  AND (s.id_status IS NULL OR s.id_status != 'lulus')
 ");
 
 $totalMhs = mysqli_fetch_assoc($qTotal)['total'];

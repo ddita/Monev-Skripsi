@@ -1,6 +1,6 @@
 <?php
 session_start();
-$konstruktor = 'admin_mahasiswa';
+$konstruktor = 'admin_dosen';
 require_once '../database/config.php';
 
 /* ================= CEK LOGIN ================= */
@@ -17,12 +17,9 @@ if ($_SESSION['role'] !== 'admin') {
   $role  = $_SESSION['role'] ?? '-';
   $waktu = date('Y-m-d H:i:s');
 
-  $ket = "Pengguna $usr ($nama) mencoba akses Master Mahasiswa sebagai $role";
+  $ket = "Pengguna $usr ($nama) mencoba akses Manajemen Dosen sebagai $role";
 
-  mysqli_query(
-    $conn,
-    "INSERT INTO tbl_cross_auth (username, waktu, keterangan) VALUES ('$usr','$waktu','$ket')"
-  );
+  mysqli_query($conn,"INSERT INTO tbl_cross_auth (username, waktu, keterangan) VALUES ('$usr','$waktu','$ket')");
 
   header("Location: ../login/logout.php");
   exit;

@@ -34,32 +34,18 @@ $nip = decriptData($nipEnc);
 if (!$nip) die('Data rusak');
 
 // ================= DATA DOSEN =================
-$qDosen = mysqli_query($conn, "
-  SELECT nip, nama_dosen 
-  FROM tbl_dosen 
-  WHERE nip='$nip'
-");
+$qDosen = mysqli_query($conn, "SELECT nip, nama_dosen FROM tbl_dosen WHERE nip='$nip'");
 $dosen = mysqli_fetch_assoc($qDosen);
 if (!$dosen) die('Dosen tidak ditemukan');
 
 // ================= QUERY MAHASISWA =================
-$sql = "
-  SELECT 
-    m.nim,
-    m.nama,
-    m.prodi,
-    sk.judul
-  FROM tbl_mahasiswa m
-  LEFT JOIN tbl_skripsi sk ON sk.username = m.nim
-  WHERE m.dosen_pembimbing='$nip'
+$sql = "SELECT m.nim,m.nama,m.prodi,sk.judul FROM tbl_mahasiswa m
+  LEFT JOIN tbl_skripsi sk ON sk.username = m.nim WHERE m.dosen_pembimbing='$nip'
   ORDER BY m.nama ASC
 ";
 $qMhs = mysqli_query($conn, $sql) or die(mysqli_error($conn));
 
-
-// =================================================
 // ================= EXPORT EXCEL ==================
-// =================================================
 if ($type === 'excel') {
 
 	$spreadsheet = new Spreadsheet();
@@ -104,10 +90,7 @@ if ($type === 'excel') {
 	exit;
 }
 
-
-// =================================================
 // ================== EXPORT PDF ===================
-// =================================================
 if ($type === 'pdf') {
 
 	$pdf = new TCPDF('L', 'mm', 'A4', true, 'UTF-8', false);

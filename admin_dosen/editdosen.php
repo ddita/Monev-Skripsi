@@ -45,10 +45,7 @@ if (!$dosen) {
 }
 
 /* ================= HITUNG BEBAN ================= */
-$qBeban = mysqli_query($conn, "SELECT COUNT(*) total FROM tbl_mahasiswa WHERE dosen_pembimbing='$nip'
-            AND aktif=1
-            AND id_status != 6
-");
+$qBeban = mysqli_query($conn, "SELECT COUNT(*) total FROM tbl_mahasiswa WHERE dosen_pembimbing='$nip' AND aktif=1 AND id_status != 6");
 $beban = mysqli_fetch_assoc($qBeban)['total'];
 
 if ($beban > 8) {
