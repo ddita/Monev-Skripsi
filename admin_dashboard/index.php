@@ -214,14 +214,16 @@ $rata_hari = round($dataRata['rata_hari'] ?? 0);
             <!-- CHART -->
             <div class="col-md-8 d-flex">
               <div class="card flex-fill">
-                <div class="card-header card-header-gradient">
-                  <h3 class="card-title">
-                    <i class="fas fa-chart-bar"></i> Progres Skripsi
-                  </h3>
-                </div>
-                <div class="card-body">
-                  <div style="height:200px;">
-                    <canvas id="grafikProgres"></canvas>
+                <div class="card card-outline card-primary shadow-sm">
+                  <div class="card-header d-flex justify-content-between align-items-center">
+                    <h3 class="card-title">
+                      <i class="fas fa-chart-bar"></i> Progres Skripsi
+                    </h3>
+                  </div>
+                  <div class="card-body">
+                    <div style="height:200px;">
+                      <canvas id="grafikProgres"></canvas>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -344,89 +346,91 @@ $rata_hari = round($dataRata['rata_hari'] ?? 0);
 
           <!-- AKTIVITAS -->
           <div class="card">
-            <div class="card-header border-0 card-header-gradient">
-              <h3 class="card-title">
-                <i class="fas fa-history mr-1"></i> Aktivitas Terakhir
-              </h3>
-            </div>
+            <div class="card card-outline card-primary shadow-sm">
+              <div class="card-header d-flex justify-content-between align-items-center">
+                <h3 class="card-title">
+                  <i class="fas fa-history mr-1"></i> Aktivitas Terakhir
+                </h3>
+              </div>
 
-            <div class="card-body table-responsive p-0">
-              <table class="table table-hover">
-                <thead>
-                  <tr>
-                    <th class="text-center">Mahasiswa</th>
-                    <th class="text-center">Dosen Pembimbing</th>
-                    <th class="text-center">Status</th>
-                    <th class="text-center">Update</th>
-                  </tr>
-                </thead>
+              <div class="card-body table-responsive p-0">
+                <table class="table table-hover">
+                  <thead>
+                    <tr>
+                      <th class="text-center">Mahasiswa</th>
+                      <th class="text-center">Dosen Pembimbing</th>
+                      <th class="text-center">Status</th>
+                      <th class="text-center">Update</th>
+                    </tr>
+                  </thead>
 
-                <?php if (mysqli_num_rows($qAktivitas) > 0): ?>
-                  <?php while ($row = mysqli_fetch_assoc($qAktivitas)): ?>
+                  <?php if (mysqli_num_rows($qAktivitas) > 0): ?>
+                    <?php while ($row = mysqli_fetch_assoc($qAktivitas)): ?>
 
-                    <?php
-                    // highlight jika >14 hari tidak update
-                    $rowClass = ($row['selisih_hari'] > 14) ? 'table-danger' : '';
-                    ?>
+                      <?php
+                      // highlight jika >14 hari tidak update
+                      $rowClass = ($row['selisih_hari'] > 14) ? 'table-danger' : '';
+                      ?>
 
-                    <tr class="<?= $rowClass ?>">
-                      <!-- USERNAME -->
-                      <td>
-                        <a href="../admin_mahasiswa/detailmhs.php?nim=<?= encryptData($row['username']); ?>"
-                          class="fw-bold text-decoration-none"
-                          data-bs-toggle="tooltip"
-                          title="Lihat detail skripsi">
-                          <i class="fas fa-user"></i>
-                          <?= htmlspecialchars($row['nama_mahasiswa']); ?>
-                        </a>
-                      </td>
-
-                      <!-- JUDUL -->
-                      <td>
-                        <?php if (!empty($row['nip_dosen'])): ?>
-                          <a href="../admin_dosen/detaildosen.php?nip=<?= encryptData($row['nip_dosen']); ?>"
-                            class="text-decoration-none fw-bold"
+                      <tr class="<?= $rowClass ?>">
+                        <!-- USERNAME -->
+                        <td>
+                          <a href="../admin_mahasiswa/detailmhs.php?nim=<?= encryptData($row['username']); ?>"
+                            class="fw-bold text-decoration-none"
                             data-bs-toggle="tooltip"
-                            title="Lihat detail dosen">
-                            <i class="fas fa-user-tie text-primary"></i>
-                            <?= htmlspecialchars($row['nama_dosen']); ?>
+                            title="Lihat detail skripsi">
+                            <i class="fas fa-user"></i>
+                            <?= htmlspecialchars($row['nama_mahasiswa']); ?>
                           </a>
-                        <?php else: ?>
-                          <span class="text-muted fst-italic">
-                            <i class="fas fa-user-slash"></i> Belum ditentukan
-                          </span>
-                        <?php endif; ?>
-                      </td>
+                        </td>
 
-                      <!-- STATUS -->
-                      <td>
-                        <?= statusBadge($row['status_skripsi']); ?>
-                      </td>
+                        <!-- JUDUL -->
+                        <td>
+                          <?php if (!empty($row['nip_dosen'])): ?>
+                            <a href="../admin_dosen/detaildosen.php?nip=<?= encryptData($row['nip_dosen']); ?>"
+                              class="text-decoration-none fw-bold"
+                              data-bs-toggle="tooltip"
+                              title="Lihat detail dosen">
+                              <i class="fas fa-user-tie text-primary"></i>
+                              <?= htmlspecialchars($row['nama_dosen']); ?>
+                            </a>
+                          <?php else: ?>
+                            <span class="text-muted fst-italic">
+                              <i class="fas fa-user-slash"></i> Belum ditentukan
+                            </span>
+                          <?php endif; ?>
+                        </td>
 
-                      <!-- UPDATE -->
-                      <td>
-                        <i class="far fa-clock"></i>
-                        <?= date('d M Y H:i', strtotime($row['updated_at'])); ?>
+                        <!-- STATUS -->
+                        <td>
+                          <?= statusBadge($row['status_skripsi']); ?>
+                        </td>
 
-                        <?php if ($row['selisih_hari'] > 14): ?>
-                          <div class="text-danger small mt-1">
-                            <i class="fas fa-exclamation-triangle"></i>
-                            Tidak update <?= $row['selisih_hari']; ?> hari
-                          </div>
-                        <?php endif; ?>
+                        <!-- UPDATE -->
+                        <td>
+                          <i class="far fa-clock"></i>
+                          <?= date('d M Y H:i', strtotime($row['updated_at'])); ?>
+
+                          <?php if ($row['selisih_hari'] > 14): ?>
+                            <div class="text-danger small mt-1">
+                              <i class="fas fa-exclamation-triangle"></i>
+                              Tidak update <?= $row['selisih_hari']; ?> hari
+                            </div>
+                          <?php endif; ?>
+                        </td>
+                      </tr>
+
+                    <?php endwhile; ?>
+                  <?php else: ?>
+                    <tr>
+                      <td colspan="4" class="text-center text-muted">
+                        Belum ada aktivitas skripsi
                       </td>
                     </tr>
-
-                  <?php endwhile; ?>
-                <?php else: ?>
-                  <tr>
-                    <td colspan="4" class="text-center text-muted">
-                      Belum ada aktivitas skripsi
-                    </td>
-                  </tr>
-                <?php endif; ?>
-                </tbody>
-              </table>
+                  <?php endif; ?>
+                  </tbody>
+                </table>
+              </div>
             </div>
           </div>
 

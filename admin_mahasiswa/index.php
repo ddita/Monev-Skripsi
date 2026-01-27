@@ -118,7 +118,7 @@ $qMhs = mysqli_query(
       <section class="content">
         <div class="container-fluid">
 
-          <div class="card">
+          <div class="card card-outline card-primary shadow-sm">
             <div class="card-header">
               <h3 class="card-title">
                 <i class="fas fa-user-graduate"></i> Data Mahasiswa

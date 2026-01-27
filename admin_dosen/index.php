@@ -162,7 +162,7 @@ $dataProgres = [];
           </div>
 
           <!-- TABEL DOSEN -->
-          <div class="card">
+          <div class="card card-outline card-primary shadow-sm">
             <div class="card-header">
               <h3 class="card-title">
                 <i class="fas fa-users"></i> Daftar Dosen
