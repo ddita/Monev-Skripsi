@@ -23,14 +23,33 @@ if ($username !== '') {
   }
 }
 
-// daftar halaman manajemen pengguna
-$manajemenPages = [
+// USER MANAJEMEN
+$userManajemenPages = [
   'admin_mahasiswa',
-  'admin_dosen',
-  'admin_administrator'
+  'admin_dosen'
 ];
 
-$isManajemenOpen = in_array($konstruktor, $manajemenPages);
+// AKADEMIK
+$akademikPages = [
+  'admin_akademik',
+  'admin_periode',
+  'admin_prodi',
+  'admin_konsentrasi',
+  'admin_panduan'
+];
+
+$isUserManajemenOpen = in_array($konstruktor, $userManajemenPages);
+$isAkademikOpen      = in_array($konstruktor, $akademikPages);
+
+/*
+ | Pastikan hanya satu menu parent yang aktif
+ */
+if ($isUserManajemenOpen) {
+  $isAkademikOpen = false;
+} elseif ($isAkademikOpen) {
+  $isUserManajemenOpen = false;
+}
+
 ?>
 
 <aside class="main-sidebar sidebar-dark-primary elevation-4">
@@ -46,8 +65,7 @@ $isManajemenOpen = in_array($konstruktor, $manajemenPages);
     <nav class="mt-2">
       <ul class="nav nav-pills nav-sidebar flex-column"
         data-widget="treeview"
-        role="menu"
-        data-accordion="false">
+        data-accordion="true">
 
         <!-- DASHBOARD -->
         <li class="nav-item">
@@ -59,8 +77,8 @@ $isManajemenOpen = in_array($konstruktor, $manajemenPages);
         </li>
 
         <!-- MANAJEMEN PENGGUNA -->
-        <li class="nav-item <?= $isManajemenOpen ? 'menu-open' : ''; ?>">
-          <a href="#" class="nav-link <?= $isManajemenOpen ? 'active' : ''; ?>">
+        <li class="nav-item <?= $isUserManajemenOpen ? 'menu-open' : ''; ?>">
+          <a href="#" class="nav-link <?= $isUserManajemenOpen ? 'active' : ''; ?>">
             <i class="nav-icon fas fa-users-cog"></i>
             <p>
               User Manajemen
@@ -92,8 +110,8 @@ $isManajemenOpen = in_array($konstruktor, $manajemenPages);
         </li>
 
         <!-- MANAJEMEN AKADEMIK -->
-        <li class="nav-item <?= $isManajemenOpen ? 'menu-open' : ''; ?>">
-          <a href="#" class="nav-link <?= $isManajemenOpen ? 'active' : ''; ?>">
+        <li class="nav-item <?= $isAkademikOpen ? 'menu-open' : ''; ?>">
+          <a href="#" class="nav-link <?= $isAkademikOpen ? 'active' : ''; ?>">
             <i class="nav-icon fas fa-university"></i>
             <p>
               Manajemen Akademik
