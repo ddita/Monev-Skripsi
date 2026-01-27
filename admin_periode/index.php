@@ -74,16 +74,7 @@ function decriptData($data)
     </div>
 
     <?php include '../mhs_navbar.php'; ?>
-
-    <aside class="main-sidebar sidebar-dark-primary elevation-4">
-      <a href="#" class="brand-link">
-        <img src="../images/profile.png" class="brand-image img-circle elevation-3">
-        <span class="brand-text font-weight-light">Monev Skripsi</span>
-      </a>
-      <div class="sidebar">
-        <?php include '../admin_sidebar.php'; ?>
-      </div>
-    </aside>
+    <?php include '../admin_sidebar.php'; ?>
 
     <div class="content-wrapper">
 
@@ -102,7 +93,7 @@ function decriptData($data)
             </div>
             <div class="col-sm-6">
               <ol class="breadcrumb float-sm-right">
-                <li class="breadcrumb-item"><a href="#">Dashboard</a></li>
+                <li class="breadcrumb-item"><a href="../admin_dashboard">Dashboard</a></li>
                 <li class="breadcrumb-item active">Periode</li>
               </ol>
             </div>
@@ -143,7 +134,9 @@ function decriptData($data)
 
                   <?php
                   $no = 1;
-                  $qperiode = mysqli_query($conn,"SELECT p.id_periode,p.nama_periode,p.semester,p.status_aktif,p.created_at,t.tahun_akademik
+                  $qperiode = mysqli_query(
+                    $conn,
+                    "SELECT p.id_periode,p.nama_periode,p.semester,p.status_aktif,p.created_at,t.tahun_akademik
                   FROM tbl_periode p JOIN tbl_tahun_akademik t ON t.id_tahun = p.id_tahun
                   ORDER BY p.created_at DESC"
                   );

@@ -1,167 +1,196 @@
 <?php
 session_start();
-$konstruktor = 'admin_master_prodi';
+$konstruktor = 'admin_prodi';
 require_once '../database/config.php';
-if ($_SESSION['status']!=0) {
-  $usr = $_SESSION['username'];
-  $waktu = date('Y-m-d H:i:s');
-  $auth = $_SESSION['status'];
-  $nama = $_SESSION['nama_user'];
-  if ($auth==1) {
-    $tersangka = "Dosen";
-  }
-  if ($auth==2) {
-    $tersangka = "Mahasiswa";
-  }
-  
-  $ket = "Pengguna dengan username ".$usr.", nama : ".$nama." melakukan cross authority dengan akses sebagai ".$tersangka;
-  $querycrossauth = mysqli_query($conn, "INSERT INTO tbl_cross_auth VALUES ('', '$usr', '$waktu', '$ket')") or die(mysqli_error($conn));
-  echo '<script>window.location="../login/logout.php"</script>';
 
+/* ================= CEK LOGIN ================= */
+if (!isset($_SESSION['role'])) {
+  header("Location: ../login/logout.php");
+  exit;
 }
-else {
-  ?>
-  <!DOCTYPE html>
-  <html lang="en">
-  <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Monev Skripsi | Administrator</title>
-    <?php
-    include '../mhs_listlink.php';
-    ?>
-  </head>
-  <body class="hold-transition sidebar-mini layout-fixed">
-    <div class="wrapper">
-      <!-- Preloader -->
-      <div class="preloader flex-column justify-content-center align-items-center">
-        <img class="animation__shake" src="../images/UP.png" alt="Monev-Skripsi" height="60" width="60">
+
+// HARUS ADMIN
+if ($_SESSION['role'] !== 'admin') {
+
+  $usr   = $_SESSION['username'] ?? '-';
+  $nama  = $_SESSION['nama_user'] ?? '-';
+  $role  = $_SESSION['role'] ?? '-';
+  $waktu = date('Y-m-d H:i:s');
+
+  $ket = "Pengguna $usr ($nama) mencoba akses Manajemen Akademik sebagai $role";
+
+  mysqli_query($conn, "INSERT INTO tbl_cross_auth (username, waktu, keterangan) VALUES ('$usr','$waktu','$ket')");
+
+  header("Location: ../login/logout.php");
+  exit;
+}
+
+function encriptData($data)
+{
+  $key = 'monev_skripsi_2024'; // ganti sesuai kebutuhan
+  return urlencode(base64_encode(openssl_encrypt(
+    $data,
+    'AES-128-ECB',
+    $key
+  )));
+}
+
+function decriptData($data)
+{
+  $key = 'monev_skripsi_2024';
+  return openssl_decrypt(
+    base64_decode(urldecode($data)),
+    'AES-128-ECB',
+    $key
+  );
+}
+?>
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Monev Skripsi | Administrator</title>
+  <?php include '../mhs_listlink.php'; ?>
+  <script>
+    (function() {
+      const theme = localStorage.getItem("theme") || "dark";
+      document.documentElement.classList.add(theme + "-mode");
+    })();
+  </script>
+</head>
+
+<body class="hold-transition sidebar-mini layout-fixed">
+  <div class="wrapper">
+
+    <!-- PRELOADER -->
+    <div class="preloader flex-column justify-content-center align-items-center">
+      <img src="../images/UP.png" height="60">
+    </div>
+
+    <?php include '../mhs_navbar.php'; ?>
+    <?php include '../admin_sidebar.php'; ?>
+
+    <div class="content-wrapper">
+
+      <!-- HEADER -->
+      <div class="content-header">
+        <div class="container-fluid">
+          <div class="row mb-2">
+            <div class="col-sm-6">
+              <h1 class="m-0">
+                <i class="fas fa-university text-primary"></i>
+                Program Studi
+              </h1>
+            </div>
+            <div class="col-sm-6">
+              <ol class="breadcrumb float-sm-right">
+                <li class="breadcrumb-item"><a href="../admin_dashboard">Dashboard</a></li>
+                <li class="breadcrumb-item active">Program Studi</li>
+              </ol>
+            </div>
+          </div>
+        </div>
       </div>
-      <!-- Navbar -->
-      <nav class="main-header navbar navbar-expand navbar-white navbar-light">
-        <?php
-        include '../mhs_navbar.php';
-        ?>
-      </nav>
-      <!-- /.navbar -->
-      <!-- Main Sidebar Container -->
-      <aside class="main-sidebar sidebar-dark-primary elevation-4">
-        <!-- Brand Logo -->
-        <a href="index3.html" class="brand-link">
-          <img src="../images/profile.png" alt="Monev-Skripsi" class="brand-image img-circle elevation-3" style="opacity: .8">
-          <span class="brand-text font-weight-light">Monev Skripsi</span>
-        </a>
-        <!-- Sidebar -->
-        <div class="sidebar">
-          <!-- Sidebar Menu -->
-          <nav class="mt-2">
-            <?php
-            include '../admin_sidebar.php';
-            ?>
-          </nav>
-          <!-- /.sidebar-menu -->
-        </div>
-        <!-- /.sidebar -->
-      </aside>
-      <!-- Content Wrapper. Contains page content -->
-      <div class="content-wrapper">
-        <!-- Content Header (Page header) -->
-        <div class="content-header">
-          <div class="container-fluid">
-            <div class="row mb-2">
-              <div class="col-sm-6">
-                <h1 class="m-0">Master Data Program Studi</h1>
-              </div><!-- /.col -->
-              <div class="col-sm-6">
-                <ol class="breadcrumb float-sm-right">
-                  <li class="breadcrumb-item"><a href="#">Admin Dashboard</a></li>
-                  <li class="breadcrumb-item active">Master Data Program Studi</li>
-                </ol>
-              </div><!-- /.col -->
-            </div><!-- /.row -->
-          </div><!-- /.container-fluid -->
-        </div>
-        <!-- /.content-header -->
-        <!-- Main content -->
-        <section class="content">
-          <div class="container-fluid">
-            <!-- Small boxes (Stat box) -->
-            <div class="row">
-              <div class="col-lg-6">
-                <div class="card card-primary">
-                  <div class="card-header">
-                    <h3 class="card-title"><i class="nav-icon fas fa-list"></i> Data Program Studi</h3>
-                  </div>
-                  <div class="card-body">
-                    <a href="tambahprodi.php" class="btn btn-primary btn-sm"><i class="nav-icon fas fa-download"></i> Tambah Data</a>
-                    <a href="proses.php?reset=reset_data" class="btn btn-danger btn-sm" onclick="return confirm('Apakah anda yakin akan mereset data ini?')"><i class="nav-icon fas fa-sync"></i> Reset Data</a>
-                    <br>
-                    <br>
-                    <table id="example1" class="table table-bordered table-striped table-sm">
-                      <thead>
-                        <tr>
-                          <th width="10%">No</th>
-                          <th>Kode Prodi</th>
-                          <th>Nama Prodi</th>
-                          <th><center>Aksi</center></th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        <?php
-                        $no=1;
-                        $queryprodi = mysqli_query($conn, "SELECT * FROM tbl_prodi") or die(mysqli_error($conn));
-                        if (mysqli_num_rows($queryprodi)>0){
-                          while ($dt_prodi = mysqli_fetch_array($queryprodi)){
-                            ?>
-                            <tr>
-                              <td><?=$no++;?></td>
-                              <td><?=$dt_prodi['kode_prodi'];?></td>
-                              <td><?=$dt_prodi['nama_prodi'];?></td>
-                              <td>
-                                <center>
-                                  <a href="proses.php?kd_prodi=<?=$dt_prodi['kode_prodi'];?>" class="btn btn-sm btn-danger" onclick="return confirm('Anda akan menghapus data angkatan dengan kode [<?=$dt_prodi['kode_prodi'];?>] - Prodi : [<?=$dt_prodi['nama_prodi'];?>]')">
-                                    <i class="nav-icon fas fa-trash"></i></a>
-                                  </center>
-                                </td>
-                              </tr>
-                              <?php
-                            }
-                          }
-                          else {
-                            ?>
-                            <tr>
-                              <td colspan="4"><center>Tidak ditemukan data prodi pada database</center></td>
-                            </tr>
-                            <?php
-                          }
-                          ?>
-                        </tbody>
-                      </table>
-                    </div>
-                  </div>
-                </div>
+
+      <!-- CONTENT -->
+      <section class="content">
+        <div class="container-fluid">
+          <div class="card card-outline card-primary shadow-sm">
+            <div class="card-header">
+              <h3 class="card-title">
+                <i class="fas fa-list"></i> Data Program Studi
+              </h3>
+
+              <div class="card-tools">
+                <a href="tambah.php" class="btn btn-sm btn-primary">
+                  <i class="fas fa-plus"></i> Tambah
+                </a>
               </div>
-              <!-- /.row (main row) -->
-            </div><!-- /.container-fluid -->
-          </section>
-          <!-- /.content -->
+            </div>
+
+            <div class="card-body table-responsive">
+
+              <table id="example1"
+                class="table table-hover table-bordered table-striped">
+                <thead class="bg-light">
+                  <tr class="text-center">
+                    <th width="5%">No</th>
+                    <th>Kode Prodi</th>
+                    <th>Nama Prodi</th>
+                    <th>Jenjang</th>
+                    <th>Status</th>
+                    <th width="10%">Aksi</th>
+                  </tr>
+                </thead>
+                <tbody>
+
+                  <?php
+                  $no = 1;
+                  $qprodi = mysqli_query($conn, "SELECT * FROM tbl_prodi");
+
+                  if (mysqli_num_rows($qprodi) > 0):
+                    while ($dt = mysqli_fetch_assoc($qprodi)):
+                  ?>
+
+                      <tr>
+                        <td class="text-center"><?= $no++; ?></td>
+                        <td class="text-center">
+                          <strong><?= htmlspecialchars($dt['kode_prodi']); ?></strong>
+                        </td>
+                        <td>
+                          <strong><?= htmlspecialchars($dt['nama_prodi']); ?></strong>
+                        </td>
+                        <td class="text-center">
+                          <strong><?= htmlspecialchars($dt['jenjang']); ?></strong>
+                        </td>
+                        <td>
+                          <strong><?= htmlspecialchars($dt['status_aktif']); ?></strong>
+                        </td>
+                        <td class="text-center">
+                          <a href="proses.php?action=hapus&kd_prd=<?= encriptData($dt['id_prodi']); ?>"
+                            class="btn btn-sm btn-outline-danger"
+                            data-toggle="tooltip"
+                            title="Hapus data"
+                            onclick="return confirm('Hapus periode <?= $dt['nama_prodi']; ?> ?')">
+                            <i class="fas fa-trash"></i>
+                          </a>
+                        </td>
+                      </tr>
+
+                    <?php endwhile;
+                  else: ?>
+
+                    <tr>
+                      <td colspan="5" class="text-center text-muted py-4">
+                        <i class="fas fa-info-circle"></i>
+                        Tidak ada data 
+                      </td>
+                    </tr>
+
+                  <?php endif; ?>
+
+                </tbody>
+              </table>
+
+            </div>
+          </div>
+
         </div>
-        <!-- /.content-wrapper -->
-        <?php
-        include '../footer.php';
-        ?>
+      </section>
+    </div>
 
-        <!-- Control Sidebar -->
-        <aside class="control-sidebar control-sidebar-dark">
-          <!-- Control sidebar content goes here -->
-        </aside>
-        <!-- /.control-sidebar -->
-      </div>
-      <!-- ./wrapper -->
-      <?php
-      include '../mhs_script.php';
-    }
-    ?>
+    <?php include '../footer.php'; ?>
+  </div>
+  <?php include '../mhs_script.php'; ?>
+  <script>
+    $(function() {
+      $('[data-toggle="tooltip"]').tooltip();
+    });
+  </script>
 
-  </body>
-  </html>
+</body>
+
+</html>

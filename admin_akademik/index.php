@@ -86,8 +86,10 @@ $query = mysqli_query($conn, "SELECT * FROM tbl_tahun_akademik ORDER BY status_a
         <div class="container-fluid">
           <div class="row mb-2">
             <div class="col-sm-6">
-              <h1>Manajemen Tahun Akademik</h1>
-              <!-- <small class="text-muted">Kelola data dosen & beban bimbingan skripsi</small> -->
+              <h1 class="m-0">
+                <i class="fas fa-calendar-alt text-primary"></i>
+                Tahun Periode Akademik
+              </h1>
             </div>
             <div class="col-sm-6">
               <ol class="breadcrumb float-sm-right">
@@ -104,7 +106,7 @@ $query = mysqli_query($conn, "SELECT * FROM tbl_tahun_akademik ORDER BY status_a
           <div class="card card-outline card-primary shadow-sm">
             <div class="card-header">
               <h3 class="card-title">
-                <i class="fas fa-calendar-alt"></i> Tahun Akademik
+                <i class="fas fa-list"></i> Tahun Akademik
               </h3>
 
               <div class="card-tools">

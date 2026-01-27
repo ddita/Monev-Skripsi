@@ -188,7 +188,10 @@ $rata_hari = round($dataRata['rata_hari'] ?? 0);
         <div class="container-fluid">
           <div class="row mb-1">
             <div class="col-sm-12">
-              <h1 class="m-0">Dashboard Administrator</h1>
+              <h1 class="m-0">
+                <i class="fas fa-home text-primary"></i>
+                Dashboard
+              </h1>
               <small class="text-muted">
                 Selamat datang, <b><?= htmlspecialchars($_SESSION['nama_user']); ?></b>
               </small>

@@ -105,7 +105,10 @@ $dataProgres = [];
         <div class="container-fluid">
           <div class="row mb-2">
             <div class="col-sm-6">
-              <h1>Manajemen Dosen</h1>
+              <h1 class="m-0">
+                <i class="fas fa-users text-primary"></i>
+                Manajemen Dosen
+              </h1>
               <small class="text-muted">Kelola data dosen & beban bimbingan skripsi</small>
             </div>
             <div class="col-sm-6">
@@ -165,7 +168,7 @@ $dataProgres = [];
           <div class="card card-outline card-primary shadow-sm">
             <div class="card-header">
               <h3 class="card-title">
-                <i class="fas fa-users"></i> Daftar Dosen
+                <i class="fas fa-list"></i> Daftar Dosen
               </h3>
               <div class="card-tools">
                 <a href="tambah.php" class="btn btn-primary btn-sm">

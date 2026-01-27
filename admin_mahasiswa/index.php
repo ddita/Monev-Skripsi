@@ -101,7 +101,10 @@ $qMhs = mysqli_query(
         <div class="container-fluid">
           <div class="row mb-2">
             <div class="col-sm-6">
-              <h1>Manajemen Mahasiswa</h1>
+              <h1 class="m-0">
+                <i class="fas fa-user-graduate text-primary"></i>
+                Manajemen Mahasiswa
+              </h1>
               <small class="text-muted">Data Mahasiswa Skripsi</small>
             </div>
             <div class="col-sm-6">
@@ -121,7 +124,7 @@ $qMhs = mysqli_query(
           <div class="card card-outline card-primary shadow-sm">
             <div class="card-header">
               <h3 class="card-title">
-                <i class="fas fa-user-graduate"></i> Data Mahasiswa
+                <i class="fas fa-list"></i> Data Mahasiswa
               </h3>
 
               <div class="card-tools">
