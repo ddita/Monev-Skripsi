@@ -92,6 +92,9 @@ if ($_SESSION['role'] !== 'admin') {
         <!-- Main content -->
         <section class="content">
           <div class="container-fluid">
+            <a href="../admin_mahasiswa" class="btn btn-warning btn-sm mb-3">
+              <i class="nav-icon fas fa-chevron-left"></i> Kembali
+            </a>
             <div class="row">
               <div class="col-lg-12">
                 <!-- general form elements -->
@@ -100,13 +103,10 @@ if ($_SESSION['role'] !== 'admin') {
                     <h3 class="card-title"><i class="nav-icon fas fa-user-graduate"></i> Tambah Data Mahasiswa</h3>
                   </div>
                   <!-- /.card-header -->
-                  <!-- form start -->
+
                   <form action="proses.php" method="post" class="form-mahasiswa">
                     <input type="hidden" name="action" value="tambah">
                     <div class="card-body">
-                      <a href="../admin_mahasiswa" class="btn btn-warning btn-sm mb-3">
-                        <i class="nav-icon fas fa-chevron-left"></i> Kembali
-                      </a>
                       <div class="row">
                         <!-- ================= KOLOM KIRI : DATA MAHASISWA ================= -->
                         <div class="col-md-6">

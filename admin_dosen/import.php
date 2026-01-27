@@ -70,7 +70,7 @@ try {
 			$sqlUser = "UPDATE tbl_users SET nama_lengkap='$nama_dosen', status='$statusUser' WHERE username='$nip' ";
 		} else {
 			$sqlUser = "INSERT INTO tbl_users (username, password, nama_lengkap, role, status, created_at)
-        VALUES ('$nip','$password','$nama_dosen','dosen','$statusUser','$now')";
+				VALUES ('$nip','$password','$nama_dosen','dosen','$statusUser','$now')";
 		}
 
 		if (!mysqli_query($conn, $sqlUser)) {
@@ -82,16 +82,14 @@ try {
 	mysqli_commit($conn);
 
 	if (!empty($duplikat)) {
-		$_SESSION['alert_warning'] =
-			"Import selesai, beberapa data dilewati:<br>" .
+		$_SESSION['alert_warning'] = "Import selesai, beberapa data dilewati:<br>" .
 			implode("<br>", $duplikat);
 	}
 
-	$_SESSION['alert_success'] =
-		"Import berhasil 🎉<br>Total data berhasil diproses: <b>$berhasil</b>";
+	$_SESSION['alert_success'] = "Import berhasil<br>Total data berhasil diproses: <b>$berhasil</b>";
 } catch (Exception $e) {
 	mysqli_rollback($conn);
-	$_SESSION['alert_warning'] = "Import gagal ❌<br>" . $e->getMessage();
+	$_SESSION['alert_warning'] = "Import gagal<br>" . $e->getMessage();
 }
 
 header("Location: ../admin_dosen");

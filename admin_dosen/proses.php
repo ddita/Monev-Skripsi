@@ -75,9 +75,7 @@ try {
 
         /* === INSERT tbl_users === */
         $password = sha1($nip);
-        $stmt = mysqli_prepare(
-            $conn,
-            "INSERT INTO tbl_users (username, password, nama_lengkap, role, status, created_at)
+        $stmt = mysqli_prepare($conn,"INSERT INTO tbl_users (username, password, nama_lengkap, role, status, created_at)
         VALUES (?, ?, ?, 'dosen', 'aktif', NOW())"
         );
         mysqli_stmt_bind_param($stmt, "sss", $nip, $password, $nama_dosen);
@@ -98,13 +96,13 @@ try {
         mysqli_begin_transaction($conn);
 
         try {
-            // 🔹 Update tbl_dosen
+            // Update tbl_dosen
             $q1 = mysqli_query($conn, "UPDATE tbl_dosen SET nama_dosen = '$nama_dosen',aktif = '$aktif' WHERE nip = '$nip'");
             if (!$q1) {
                 throw new Exception(mysqli_error($conn));
             }
 
-            // 🔹 Update tbl_users (sinkron)
+            // Update tbl_users (sinkron)
             $q2 = mysqli_query($conn, "UPDATE tbl_users SET nama_lengkap = '$nama_dosen',status = '$status_user' WHERE username = '$nip'");
             if (!$q2) {
                 throw new Exception(mysqli_error($conn));
@@ -117,7 +115,7 @@ try {
             exit;
         } catch (Exception $e) {
             mysqli_rollback($conn);
-            die("❌ Gagal update dosen: " . $e->getMessage());
+            die("Gagal update dosen: " . $e->getMessage());
         }
     }
 

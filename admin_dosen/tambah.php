@@ -69,7 +69,7 @@ if ($_SESSION['role'] !== 'admin') {
           </div>
         </section>
 
-        <section class="content">
+        <section class="content col-md-6">
           <div class="container-fluid">
             <a href="../admin_dosen" class="btn btn-warning btn-sm mb-3">
               <i class="nav-icon fas fa-chevron-left"></i> Kembali

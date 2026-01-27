@@ -256,15 +256,15 @@ $dataProgres = [];
                             <i class="fas fa-users"></i>
                           </a>
 
-                          <?php if ($row['aktif'] == 1): ?>
-                            <!-- EDIT (HANYA JIKA AKTIF) -->
-                            <a href="editdosen.php?nip=<?= encriptData($row['nip']); ?>"
-                              class="btn btn-sm btn-warning"
-                              title="Edit Data">
-                              <i class="fas fa-edit"></i>
-                            </a>
+                          <!-- EDIT -->
+                          <a href="editdosen.php?nip=<?= encriptData($row['nip']); ?>"
+                            class="btn btn-sm btn-warning"
+                            title="Edit Data">
+                            <i class="fas fa-edit"></i>
+                          </a>
 
-                            <!-- NONAKTIFKAN -->
+                          <!-- NONAKTIFKAN -->
+                          <?php if ($row['aktif'] == 1): ?>
                             <a href="proses.php?action=toggle&nip=<?= encriptData($row['nip']); ?>"
                               class="btn btn-sm btn-danger"
                               onclick="return confirm('Nonaktifkan dosen ini?')"
@@ -281,7 +281,7 @@ $dataProgres = [];
                             </a>
                           <?php endif; ?>
 
-                          <!-- HAPUS (SELALU TAMPIL) -->
+                          <!-- HAPUS -->
                           <a href="proses.php?action=hapus&nip=<?= encriptData($row['nip']); ?>"
                             class="btn btn-sm btn-dark"
                             onclick="return confirm('Hapus permanen data dosen?')"
