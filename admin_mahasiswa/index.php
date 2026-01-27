@@ -228,7 +228,7 @@ $qMhs = mysqli_query(
 
                         <!-- HAPUS -->
                         <a href="proses.php?action=hapus&nim=<?= encriptData($m['nim']); ?>"
-                          class="btn btn-sm btn-dark"
+                          class="btn btn-sm btn-outline-danger"
                           onclick="return confirm('Hapus permanen data mahasiswa?')"
                           title="Hapus">
                           <i class="fas fa-trash"></i>

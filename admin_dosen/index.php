@@ -169,7 +169,7 @@ $dataProgres = [];
               </h3>
               <div class="card-tools">
                 <a href="tambah.php" class="btn btn-primary btn-sm">
-                  <i class="fas fa-plus"></i> Tambah Dosen
+                  <i class="fas fa-plus"></i> Tambah
                 </a>
                 <button type="button" class="btn btn-warning btn-sm" data-toggle="modal" data-target="#importModal">
                   <i class="fas fa-file"></i> Import
@@ -283,7 +283,7 @@ $dataProgres = [];
 
                           <!-- HAPUS -->
                           <a href="proses.php?action=hapus&nip=<?= encriptData($row['nip']); ?>"
-                            class="btn btn-sm btn-dark"
+                            class="btn btn-sm btn-outline-danger"
                             onclick="return confirm('Hapus permanen data dosen?')"
                             title="Hapus">
                             <i class="fas fa-trash"></i>

@@ -181,7 +181,7 @@ $query = mysqli_query($conn, "SELECT * FROM tbl_tahun_akademik ORDER BY status_a
 
                           <!-- HAPUS -->
                           <a href="proses.php?action=hapus&id_tahun=<?= encriptData($row['id_tahun']); ?>"
-                            class="btn btn-sm btn-dark"
+                            class="btn btn-sm btn-outline-danger"
                             onclick="return confirm('Hapus permanen data tahun akademik ini?')"
                             title="Hapus">
                             <i class="fas fa-trash"></i>

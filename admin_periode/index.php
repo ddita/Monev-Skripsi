@@ -1,24 +1,15 @@
 <?php
 session_start();
-$konstruktor = 'admin_master_periode';
+$konstruktor = 'admin_periode';
 require_once '../database/config.php';
 
-/* =========================
-   HELPER ENKRIPSI DATA
-   ========================= */
-function encriptData($data)
-{
-  return urlencode(base64_encode($data));
+/* ================= CEK LOGIN ================= */
+if (!isset($_SESSION['role'])) {
+  header("Location: ../login/logout.php");
+  exit;
 }
 
-function decriptData($data)
-{
-  return base64_decode(urldecode($data));
-}
-
-/* =========================
-   CEK OTORISASI
-   ========================= */
+// HARUS ADMIN
 if ($_SESSION['role'] !== 'admin') {
 
   $usr   = $_SESSION['username'] ?? '-';
@@ -26,18 +17,35 @@ if ($_SESSION['role'] !== 'admin') {
   $role  = $_SESSION['role'] ?? '-';
   $waktu = date('Y-m-d H:i:s');
 
-  $tersangka = ucfirst($role);
-
-  $ket = "Pengguna dengan username $usr, nama: $nama melakukan cross authority dengan akses sebagai $tersangka";
+  $ket = "Pengguna $usr ($nama) mencoba akses Manajemen Akademik sebagai $role";
 
   mysqli_query(
     $conn,
-    "INSERT INTO tbl_cross_auth (username, waktu, keterangan)
-     VALUES ('$usr', '$waktu', '$ket')"
+    "INSERT INTO tbl_cross_auth (username, waktu, keterangan) VALUES ('$usr','$waktu','$ket')"
   );
 
   header("Location: ../login/logout.php");
   exit;
+}
+
+function encriptData($data)
+{
+  $key = 'monev_skripsi_2024'; // ganti sesuai kebutuhan
+  return urlencode(base64_encode(openssl_encrypt(
+    $data,
+    'AES-128-ECB',
+    $key
+  )));
+}
+
+function decriptData($data)
+{
+  $key = 'monev_skripsi_2024';
+  return openssl_decrypt(
+    base64_decode(urldecode($data)),
+    'AES-128-ECB',
+    $key
+  );
 }
 ?>
 
@@ -49,6 +57,12 @@ if ($_SESSION['role'] !== 'admin') {
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Monev Skripsi | Administrator</title>
   <?php include '../mhs_listlink.php'; ?>
+  <script>
+    (function() {
+      const theme = localStorage.getItem("theme") || "dark";
+      document.documentElement.classList.add(theme + "-mode");
+    })();
+  </script>
 </head>
 
 <body class="hold-transition sidebar-mini layout-fixed">
@@ -99,21 +113,15 @@ if ($_SESSION['role'] !== 'admin') {
       <!-- CONTENT -->
       <section class="content">
         <div class="container-fluid">
-
           <div class="card card-outline card-primary shadow-sm">
-            <div class="card-header d-flex justify-content-between align-items-center">
+            <div class="card-header">
               <h3 class="card-title">
                 <i class="fas fa-list"></i> Data Periode Akademik
               </h3>
 
-              <div class="btn-group">
-                <a href="tambahprd.php" class="btn btn-sm btn-primary">
+              <div class="card-tools">
+                <a href="tambah.php" class="btn btn-sm btn-primary">
                   <i class="fas fa-plus"></i> Tambah
-                </a>
-                <a href="resetdata.php?reset=reset_data"
-                  class="btn btn-sm btn-danger"
-                  onclick="return confirm('Apakah anda yakin akan mereset data ini?')">
-                  <i class="fas fa-sync"></i>
                 </a>
               </div>
             </div>
@@ -125,7 +133,6 @@ if ($_SESSION['role'] !== 'admin') {
                 <thead class="bg-light">
                   <tr class="text-center">
                     <th width="5%">No</th>
-                    <th>ID</th>
                     <th>Periode</th>
                     <th>Tahun Akademik</th>
                     <th>Semester</th>
@@ -136,19 +143,17 @@ if ($_SESSION['role'] !== 'admin') {
 
                   <?php
                   $no = 1;
-                  $queryprd = mysqli_query($conn, "SELECT * FROM tbl_periode");
+                  $qperiode = mysqli_query($conn,"SELECT p.id_periode,p.nama_periode,p.semester,p.status_aktif,p.created_at,t.tahun_akademik
+                  FROM tbl_periode p JOIN tbl_tahun_akademik t ON t.id_tahun = p.id_tahun
+                  ORDER BY p.created_at DESC"
+                  );
 
-                  if (mysqli_num_rows($queryprd) > 0):
-                    while ($dt = mysqli_fetch_assoc($queryprd)):
+                  if (mysqli_num_rows($qperiode) > 0):
+                    while ($dt = mysqli_fetch_assoc($qperiode)):
                   ?>
 
                       <tr>
                         <td class="text-center"><?= $no++; ?></td>
-                        <td class="text-center">
-                          <span class="badge badge-secondary">
-                            <?= $dt['id_periode']; ?>
-                          </span>
-                        </td>
                         <td>
                           <strong><?= htmlspecialchars($dt['nama_periode']); ?></strong>
                         </td>
@@ -163,7 +168,7 @@ if ($_SESSION['role'] !== 'admin') {
                           </span>
                         </td>
                         <td class="text-center">
-                          <a href="proseshapus.php?kd_prd=<?= encriptData($dt['id_periode']); ?>&hapus=hapus"
+                          <a href="proses.php?action=hapus&kd_prd=<?= encriptData($dt['id_periode']); ?>"
                             class="btn btn-sm btn-outline-danger"
                             data-toggle="tooltip"
                             title="Hapus data"
