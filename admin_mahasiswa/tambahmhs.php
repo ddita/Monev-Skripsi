@@ -76,12 +76,13 @@ if ($_SESSION['role'] !== 'admin') {
           <div class="container-fluid">
             <div class="row mb-2">
               <div class="col-sm-6">
-                <h1 class="m-0">Tambah Mahasiswa</h1>
+                <h1 class="m-0">Tambah Data Mahasiswa</h1>
               </div><!-- /.col -->
               <div class="col-sm-6">
                 <ol class="breadcrumb float-sm-right">
-                  <li class="breadcrumb-item"><a href="#">Dashboard Mahasiswa</a></li>
-                  <li class="breadcrumb-item active">Tambah Data Mahasiswa</li>
+                  <li class="breadcrumb-item"><a href="../admin_dashboard">Dashboard</a></li>
+                  <li class="breadcrumb-item"><a href="../admin_mahasiswa">Mahasiswa</a></li>
+                  <li class="breadcrumb-item active">Tambah Mahasiswa</li>
                 </ol>
               </div><!-- /.col -->
             </div><!-- /.row -->
