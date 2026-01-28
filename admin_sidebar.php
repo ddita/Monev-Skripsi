@@ -34,6 +34,7 @@ $akademikPages = [
   'admin_akademik',
   'admin_periode',
   'admin_prodi',
+  'admin_angkatan',
   'admin_konsentrasi',
   'admin_panduan'
 ];
@@ -88,21 +89,21 @@ if ($isUserManajemenOpen) {
 
           <ul class="nav nav-treeview">
 
-            <!-- MANAJEMEN MAHASISWA -->
+            <!-- MAHASISWA -->
             <li class="nav-item">
               <a href="../admin_mahasiswa"
                 class="nav-link <?= $konstruktor == 'admin_mahasiswa' ? 'active' : ''; ?>">
                 <i class="far fa-circle nav-icon"></i>
-                <p>Manajemen Mahasiswa</p>
+                <p>Mahasiswa</p>
               </a>
             </li>
 
-            <!-- MANAJEMEN DOSEN -->
+            <!-- DOSEN -->
             <li class="nav-item">
               <a href="../admin_dosen"
                 class="nav-link <?= $konstruktor == 'admin_dosen' ? 'active' : ''; ?>">
                 <i class="far fa-circle nav-icon"></i>
-                <p>Manajemen Dosen</p>
+                <p>Dosen</p>
               </a>
             </li>
 
@@ -121,7 +122,7 @@ if ($isUserManajemenOpen) {
 
           <ul class="nav nav-treeview">
 
-            <!-- MANAJEMEN TAHUN AKADEMIK -->
+            <!-- TAHUN AKADEMIK -->
             <li class="nav-item">
               <a href="../admin_akademik"
                 class="nav-link <?= $konstruktor == 'admin_akademik' ? 'active' : ''; ?>">
@@ -130,7 +131,7 @@ if ($isUserManajemenOpen) {
               </a>
             </li>
 
-            <!-- MANAJEMEN PERIODE -->
+            <!-- PERIODE -->
             <li class="nav-item">
               <a href="../admin_periode"
                 class="nav-link <?= $konstruktor == 'admin_periode' ? 'active' : ''; ?>">
@@ -139,11 +140,19 @@ if ($isUserManajemenOpen) {
               </a>
             </li>
 
-            <!-- MANAJEMEN PRODI -->
+            <!-- PRODI -->
             <li class="nav-item">
               <a href="../admin_prodi" class="nav-link <?= $konstruktor == 'admin_prodi' ? 'active' : ''; ?>">
                 <i class="far fa-circle nav-icon"></i>
                 <p>Program Studi</p>
+              </a>
+            </li>
+
+            <!-- ANGKATAN -->
+            <li class="nav-item">
+              <a href="../admin_angkatan" class="nav-link <?= $konstruktor == 'admin_angkatan' ? 'active' : ''; ?>">
+                <i class="far fa-circle nav-icon"></i>
+                <p>Tahun Angkatan</p>
               </a>
             </li>
 
