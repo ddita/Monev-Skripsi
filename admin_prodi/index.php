@@ -121,8 +121,8 @@ function decriptData($data)
                     <th>Kode Prodi</th>
                     <th>Nama Prodi</th>
                     <th>Jenjang</th>
-                    <th>Status</th>
-                    <th width="10%">Aksi</th>
+                    <th>Status Aktif</th>
+                    <th>Aksi</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -146,10 +146,32 @@ function decriptData($data)
                         <td class="text-center">
                           <strong><?= htmlspecialchars($dt['jenjang']); ?></strong>
                         </td>
-                        <td>
+                        <td class="text-center">
                           <strong><?= htmlspecialchars($dt['status_aktif']); ?></strong>
                         </td>
                         <td class="text-center">
+                          <!-- EDIT DATA -->
+                          <a href="edit.php?id_prodi=<?= encriptData($dt['id_prodi']); ?>" class="btn btn-sm btn-warning" title="Edit Data">
+                            <i class="fas fa-edit"></i>
+                          </a>
+                          <?php if ($dt['status_aktif'] == 'Aktif'): ?>
+                            <!-- NONAKTIFKAN -->
+                            <a href="proses.php?action=toggle&id_prodi=<?= encriptData($dt['id_prodi']); ?>"
+                              class="btn btn-sm btn-danger"
+                              onclick="return confirm('Nonaktifkan prodi ini?')"
+                              title="Nonaktifkan">
+                              <i class="fas fa-power-off"></i>
+                            </a>
+                          <?php else: ?>
+                            <!-- AKTIFKAN -->
+                            <a href="proses.php?action=toggle&id_prodi=<?= encriptData($dt['id_prodi']); ?>"
+                              class="btn btn-sm btn-success"
+                              onclick="return confirm('Aktifkan kembali prodi ini?')"
+                              title="Aktifkan">
+                              <i class="fas fa-check"></i>
+                            </a>
+                          <?php endif; ?>
+                          <!-- HAPUS -->
                           <a href="proses.php?action=hapus&id_prodi=<?= encriptData($dt['id_prodi']); ?>"
                             class="btn btn-sm btn-outline-danger"
                             data-toggle="tooltip"
@@ -166,7 +188,7 @@ function decriptData($data)
                     <tr>
                       <td colspan="5" class="text-center text-muted py-4">
                         <i class="fas fa-info-circle"></i>
-                        Tidak ada data 
+                        Tidak ada data
                       </td>
                     </tr>
 
