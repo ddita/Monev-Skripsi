@@ -25,8 +25,6 @@ if ($_SESSION['role'] !== 'admin') {
   exit;
 }
 
-/* ================= AMBIL TAHUN AKADEMIK AKTIF ================= */
-//$qTahun = mysqli_query($conn, "SELECT id_tahun, tahun_akademik FROM tbl_tahun_akademik WHERE status_aktif = 'Aktif' LIMIT 1");
 ?>
 
 <!DOCTYPE html>
@@ -97,6 +95,9 @@ if ($_SESSION['role'] !== 'admin') {
           <!-- Small boxes (Stat box) -->
           <div class="row">
             <div class="col-lg-6">
+              <a href="../admin_prodi" class="btn btn-warning btn-sm mb-3">
+                <i class="fas fa-chevron-left"></i> Kembali
+              </a>
               <!-- general form elements -->
               <div class="card card-primary">
                 <div class="card-header">
@@ -107,10 +108,6 @@ if ($_SESSION['role'] !== 'admin') {
                 <form action="proses.php" method="post">
                   <input type="hidden" name="action" value="tambah">
                   <div class="card-body">
-
-                    <a href="../admin_prodi" class="btn btn-warning btn-sm mb-3">
-                      <i class="fas fa-chevron-left"></i> Kembali
-                    </a>
 
                     <!-- KODE PRODI -->
                     <div class="form-group">
@@ -134,7 +131,7 @@ if ($_SESSION['role'] !== 'admin') {
                         <option value="S1">S2</option>
                       </select>
                     </div>
-                    
+
                   </div>
                   <div class="card-footer">
                     <button type="submit" class="btn btn-primary btn-block" name="tambah">
