@@ -150,7 +150,7 @@ function decriptData($data)
                           <strong><?= htmlspecialchars($dt['status_aktif']); ?></strong>
                         </td>
                         <td class="text-center">
-                          <a href="proses.php?action=hapus&kd_prd=<?= encriptData($dt['id_prodi']); ?>"
+                          <a href="proses.php?action=hapus&id_prodi=<?= encriptData($dt['id_prodi']); ?>"
                             class="btn btn-sm btn-outline-danger"
                             data-toggle="tooltip"
                             title="Hapus data"
