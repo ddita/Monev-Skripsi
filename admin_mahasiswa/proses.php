@@ -36,9 +36,7 @@ mysqli_begin_transaction($conn);
 
 try {
 
-  /* =====================================================
-     ➕ TAMBAH MAHASISWA
-  ===================================================== */
+  /* ================== TAMBAH MAHASISWA ================== */
   if ($action === 'tambah') {
     $nim        = trim($_POST['nim']);
     $nama       = trim($_POST['nama']);
@@ -85,11 +83,8 @@ try {
     // Insert user
     $password = sha1($nim);
 
-    $stmt = mysqli_prepare(
-      $conn,
-      "INSERT INTO tbl_users (username,password,nama_lengkap,role,status,created_at)
-    VALUES (?,?,?,'mahasiswa','aktif',NOW())"
-    );
+    $stmt = mysqli_prepare($conn, "INSERT INTO tbl_users (username,password,nama_lengkap,role,status,created_at)
+    VALUES (?,?,?,'mahasiswa','aktif',NOW())");
 
     mysqli_stmt_bind_param($stmt, "sss", $nim, $password, $nama);
     mysqli_stmt_execute($stmt);
@@ -97,31 +92,17 @@ try {
     mysqli_stmt_close($stmt);
 
     // Insert skripsi
-    $stmt = mysqli_prepare(
-      $conn,
-      "INSERT INTO tbl_skripsi (id_user,username,judul,id_status,id_periode,created_at,updated_at)
-    VALUES (?,?,?,?,?,NOW(),NOW())"
-    );
+    $stmt = mysqli_prepare($conn, "INSERT INTO tbl_skripsi (id_user,username,judul,id_status,id_periode,created_at,updated_at)
+    VALUES (?,?,?,?,?,NOW(),NOW())");
 
-    mysqli_stmt_bind_param(
-      $stmt,
-      "issii",
-      $id_user,
-      $nim,
-      $judul,
-      $id_status,
-      $id_periode
-    );
-
+    mysqli_stmt_bind_param($stmt,"issii",$id_user,$nim,$judul,$id_status,$id_periode);
     mysqli_stmt_execute($stmt);
     mysqli_stmt_close($stmt);
 
     logAktivitas($conn, "Menambahkan mahasiswa $nim");
   }
 
-  /* =====================================================
-     ✏️ EDIT MAHASISWA
-  ===================================================== */ elseif ($action === 'edit') {
+  /* ================== EDIT MAHASISWA ================== */ elseif ($action === 'edit') {
 
     $nim              = trim($_POST['nim']);
     $prodi            = $_POST['prodi'];
@@ -129,64 +110,27 @@ try {
     $id_status        = (int) $_POST['id_status'];
     $id_periode       = (int) $_POST['id_periode'];
     $dosen_pembimbing = $_POST['nip_dosen'];
+    $judul            = trim($_POST['judul']);
     $aktif            = (int) $_POST['aktif'];
 
     /* ================= UPDATE TBL_MAHASISWA ================= */
-    $stmt = mysqli_prepare(
-      $conn,
-      "UPDATE tbl_mahasiswa SET
-    prodi=?,
-    angkatan=?,
-    id_status=?,
-    dosen_pembimbing=?,
-    id_periode=?,
-    aktif=?,
-    updated_at=NOW()
-   WHERE nim=?"
-    );
+    $stmt = mysqli_prepare($conn, "UPDATE tbl_mahasiswa SET prodi=?,angkatan=?,id_status=?,dosen_pembimbing=?,id_periode=?,aktif=?,updated_at=NOW()WHERE nim=?");
 
-    mysqli_stmt_bind_param(
-      $stmt,
-      "ssisiis",
-      $prodi,
-      $angkatan,
-      $id_status,
-      $dosen_pembimbing,
-      $id_periode,
-      $aktif,
-      $nim
-    );
-
+    mysqli_stmt_bind_param($stmt,"ssisiis",$prodi,$angkatan,$id_status,$dosen_pembimbing,$id_periode,$aktif,$nim);
     mysqli_stmt_execute($stmt);
     mysqli_stmt_close($stmt);
 
     /* ================= UPDATE TBL_SKRIPSI ================= */
-    $stmt = mysqli_prepare(
-      $conn,
-      "UPDATE tbl_skripsi SET
-    id_status=?,
-    id_periode=?,
-    updated_at=NOW()
-   WHERE username=?"
-    );
+    $stmt = mysqli_prepare($conn,"UPDATE tbl_skripsi SET judul=?,id_status=?,id_periode=?,updated_at=NOW()WHERE username=?");
 
-    mysqli_stmt_bind_param(
-      $stmt,
-      "iis",
-      $id_status,
-      $id_periode,
-      $nim
-    );
-
+    mysqli_stmt_bind_param($stmt,"siis",$judul,$id_status,$id_periode,$nim);
     mysqli_stmt_execute($stmt);
     mysqli_stmt_close($stmt);
 
     logAktivitas($conn, "Mengedit data mahasiswa $nim");
   }
 
-  /* =====================================================
- 🔁 TOGGLE AKTIF / NONAKTIF MAHASISWA
-===================================================== */ elseif ($action === 'toggle') {
+  /* ================== TOGGLE AKTIF / NONAKTIF MAHASISWA ================== */ elseif ($action === 'toggle') {
 
     if (!isset($_GET['nim'])) {
       throw new Exception("NIM tidak ditemukan");
@@ -199,7 +143,7 @@ try {
 
     $nim = mysqli_real_escape_string($conn, $nim);
 
-    // 🔎 Ambil status saat ini
+    // Ambil status saat ini
     $q = mysqli_query($conn, "SELECT aktif FROM tbl_mahasiswa WHERE nim='$nim'");
     if (!$q || mysqli_num_rows($q) == 0) {
       throw new Exception("Data mahasiswa tidak ditemukan");

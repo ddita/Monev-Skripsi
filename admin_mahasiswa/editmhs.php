@@ -34,16 +34,17 @@ if (!isset($_GET['nim'])) {
 $nim = decriptData($_GET['nim']);
 
 /* ================= DATA MAHASISWA ================= */
-$qMhs = mysqli_query($conn, "SELECT * FROM tbl_mahasiswa WHERE nim='$nim'");
-$mhs  = mysqli_fetch_assoc($qMhs);
+$qMhs = mysqli_query($conn,"SELECT m.*,s.judul,s.id_status FROM tbl_mahasiswa m LEFT JOIN tbl_skripsi s ON s.username = m.nim WHERE m.nim='$nim'");
+$mhs = mysqli_fetch_assoc($qMhs);
 
 if (!$mhs) {
     die("Data mahasiswa tidak ditemukan");
 }
+
 ?>
 
 <!DOCTYPE html>
-<html lang="id">
+<html lang="en">
 
 <head>
     <meta charset="utf-8">
@@ -72,7 +73,6 @@ if (!$mhs) {
         </div>
 
         <div class="content-wrapper">
-
             <!-- HEADER -->
             <section class="content-header">
                 <div class="container-fluid">
@@ -98,8 +98,7 @@ if (!$mhs) {
                         <i class="nav-icon fas fa-chevron-left"></i> Kembali
                     </a>
                     <div class="row">
-                        <div class="col-lg-6">
-
+                        <div class="col-lg-12">
                             <div class="card card-warning">
                                 <div class="card-header">
                                     <h3 class="card-title">
@@ -108,104 +107,121 @@ if (!$mhs) {
                                 </div>
 
                                 <form action="proses.php?action=edit" method="POST">
+                                    <input type="hidden" name="nim" value="<?= $mhs['nim']; ?>">
                                     <div class="card-body">
-                                        <input type="hidden" name="nim" value="<?= $mhs['nim']; ?>">
-                                        <div class="form-group">
-                                            <label>NIM</label>
-                                            <input type="text" class="form-control" value="<?= $mhs['nim']; ?>" readonly>
-                                        </div>
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <h5 class="text-muted">Data Mahasiswa</h5>
+                                                <hr>
+                                                <div class="form-group">
+                                                    <label>NIM</label>
+                                                    <input type="text" class="form-control" value="<?= $mhs['nim']; ?>" readonly>
+                                                </div>
 
-                                        <div class="form-group">
-                                            <label>Nama Mahasiswa</label>
-                                            <input type="text" name="nama" class="form-control"
-                                                value="<?= htmlspecialchars($mhs['nama']); ?>" readonly>
-                                        </div>
+                                                <div class="form-group">
+                                                    <label>Nama Mahasiswa</label>
+                                                    <input type="text" name="nama" class="form-control"
+                                                        value="<?= htmlspecialchars($mhs['nama']); ?>" readonly>
+                                                </div>
 
-                                        <!-- PRODI -->
-                                        <div class="form-group">
-                                            <label>Program Studi</label>
-                                            <select name="prodi" class="form-control" required>
-                                                <?php
-                                                $qProdi = mysqli_query($conn, "SELECT * FROM tbl_prodi");
-                                                while ($p = mysqli_fetch_assoc($qProdi)) {
-                                                    $sel = ($p['kode_prodi'] == $mhs['prodi']) ? 'selected' : '';
-                                                    echo "<option value='{$p['kode_prodi']}' $sel>
+                                                <!-- PRODI -->
+                                                <div class="form-group">
+                                                    <label>Program Studi</label>
+                                                    <select name="prodi" class="form-control" required>
+                                                        <?php
+                                                        $qProdi = mysqli_query($conn, "SELECT * FROM tbl_prodi");
+                                                        while ($p = mysqli_fetch_assoc($qProdi)) {
+                                                            $sel = ($p['kode_prodi'] == $mhs['prodi']) ? 'selected' : '';
+                                                            echo "<option value='{$p['kode_prodi']}' $sel>
                                                         {$p['kode_prodi']} - {$p['nama_prodi']}
                                                       </option>";
-                                                }
-                                                ?>
-                                            </select>
-                                        </div>
-
-                                        <!-- STATUS SKRIPSI -->
-                                        <div class="form-group">
-                                            <label>Status Skripsi</label>
-                                            <select name="id_status" class="form-control" required>
-                                                <?php
-                                                $qStatus = mysqli_query(
-                                                    $conn,
-                                                    "SELECT * FROM tbl_status ORDER BY id ASC"
-                                                );
-
-                                                while ($s = mysqli_fetch_assoc($qStatus)) {
-                                                    $sel = ($s['id'] == $mhs['id_status']) ? 'selected' : '';
-                                                    echo "<option value='{$s['id']}' $sel>{$s['status']}</option>";
-                                                }
-                                                ?>
-                                            </select>
-                                        </div>
-
-                                        <!-- PERIODE AKADEDMIK -->
-                                        <div class="form-group">
-                                            <label>Periode Akademik</label>
-                                            <select name="id_periode" class="form-control" required>
-                                                <?php
-                                                $qPeriode = mysqli_query($conn, "SELECT * FROM tbl_periode ORDER BY id_periode DESC");
-                                                while ($p = mysqli_fetch_assoc($qPeriode)) {
-                                                    $sel = ($p['id_periode'] == $mhs['id_periode']) ? 'selected' : '';
-                                                    echo "<option value='{$p['id_periode']}' $sel>
+                                                        }
+                                                        ?>
+                                                    </select>
+                                                </div>
+                                                <!-- PERIODE AKADEDMIK -->
+                                                <div class="form-group">
+                                                    <label>Periode Akademik</label>
+                                                    <select name="id_periode" class="form-control" required>
+                                                        <?php
+                                                        $qPeriode = mysqli_query($conn, "SELECT * FROM tbl_periode ORDER BY id_periode DESC");
+                                                        while ($p = mysqli_fetch_assoc($qPeriode)) {
+                                                            $sel = ($p['id_periode'] == $mhs['id_periode']) ? 'selected' : '';
+                                                            echo "<option value='{$p['id_periode']}' $sel>
                                                     {$p['nama_periode']}</option>";
-                                                }
-                                                ?>
-                                            </select>
+                                                        }
+                                                        ?>
+                                                    </select>
+                                                </div>
+
+                                                <!-- DOSEN -->
+                                                <div class="form-group">
+                                                    <label>Dosen Pembimbing</label>
+                                                    <select name="nip_dosen" class="form-control" required>
+                                                        <?php
+                                                        $qDosen = mysqli_query($conn, "SELECT nip, nama_dosen FROM tbl_dosen");
+                                                        while ($d = mysqli_fetch_assoc($qDosen)) {
+                                                            $sel = ($d['nip'] == $mhs['dosen_pembimbing']) ? 'selected' : '';
+                                                            echo "<option value='{$d['nip']}' $sel>{$d['nama_dosen']}</option>";
+                                                        }
+                                                        ?>
+                                                    </select>
+                                                </div>
+
+                                                <!-- ANGKATAN -->
+                                                <div class="form-group">
+                                                    <label>Angkatan</label>
+                                                    <select name="angkatan" class="form-control" required>
+                                                        <?php
+                                                        $qAng = mysqli_query($conn, "SELECT kode_angkatan FROM tbl_angkatan ORDER BY kode_angkatan DESC");
+                                                        while ($a = mysqli_fetch_assoc($qAng)) {
+                                                            $sel = ($a['kode_angkatan'] == $mhs['angkatan']) ? 'selected' : '';
+                                                            echo "<option value='{$a['kode_angkatan']}' $sel>{$a['kode_angkatan']}</option>";
+                                                        }
+                                                        ?>
+                                                    </select>
+                                                </div>
+
+                                                <!-- AKTIF -->
+                                                <div class="form-group">
+                                                    <label>Status Mahasiswa</label>
+                                                    <select name="aktif" class="form-control">
+                                                        <option value="1" <?= $mhs['aktif'] == 1 ? 'selected' : ''; ?>>Aktif</option>
+                                                        <option value="0" <?= $mhs['aktif'] == 0 ? 'selected' : ''; ?>>Nonaktif</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <h5 class="text-muted">Data Mahasiswa</h5>
+                                                <hr>
+                                                <div class="form-group">
+                                                    <label>Judul Skripsi</label>
+                                                    <input type="text" name="judul" class="form-control"
+                                                        value="<?= htmlspecialchars($mhs['judul']); ?>">
+                                                </div>
+                                                <!-- STATUS SKRIPSI -->
+                                                <div class="form-group">
+                                                    <label>Status Skripsi</label>
+                                                    <select name="id_status" class="form-control" required>
+                                                        <?php
+                                                        $qStatus = mysqli_query(
+                                                            $conn,
+                                                            "SELECT * FROM tbl_status ORDER BY id ASC"
+                                                        );
+
+                                                        while ($s = mysqli_fetch_assoc($qStatus)) {
+                                                            $sel = ($s['id'] == $mhs['id_status']) ? 'selected' : '';
+                                                            echo "<option value='{$s['id']}' $sel>{$s['status']}</option>";
+                                                        }
+                                                        ?>
+                                                    </select>
+                                                </div>
+                                            </div>
                                         </div>
 
-                                        <!-- DOSEN -->
-                                        <div class="form-group">
-                                            <label>Dosen Pembimbing</label>
-                                            <select name="nip_dosen" class="form-control" required>
-                                                <?php
-                                                $qDosen = mysqli_query($conn, "SELECT nip, nama_dosen FROM tbl_dosen");
-                                                while ($d = mysqli_fetch_assoc($qDosen)) {
-                                                    $sel = ($d['nip'] == $mhs['dosen_pembimbing']) ? 'selected' : '';
-                                                    echo "<option value='{$d['nip']}' $sel>{$d['nama_dosen']}</option>";
-                                                }
-                                                ?>
-                                            </select>
-                                        </div>
 
-                                        <!-- ANGKATAN -->
-                                        <div class="form-group">
-                                            <label>Angkatan</label>
-                                            <select name="angkatan" class="form-control" required>
-                                                <?php
-                                                $qAng = mysqli_query($conn, "SELECT kode_angkatan FROM tbl_angkatan ORDER BY kode_angkatan DESC");
-                                                while ($a = mysqli_fetch_assoc($qAng)) {
-                                                    $sel = ($a['kode_angkatan'] == $mhs['angkatan']) ? 'selected' : '';
-                                                    echo "<option value='{$a['kode_angkatan']}' $sel>{$a['kode_angkatan']}</option>";
-                                                }
-                                                ?>
-                                            </select>
-                                        </div>
 
-                                        <!-- AKTIF -->
-                                        <div class="form-group">
-                                            <label>Status Mahasiswa</label>
-                                            <select name="aktif" class="form-control">
-                                                <option value="1" <?= $mhs['aktif'] == 1 ? 'selected' : ''; ?>>Aktif</option>
-                                                <option value="0" <?= $mhs['aktif'] == 0 ? 'selected' : ''; ?>>Nonaktif</option>
-                                            </select>
-                                        </div>
+
 
                                     </div>
 
