@@ -94,7 +94,7 @@ function decriptData($data)
       </div>
 
       <!-- CONTENT -->
-      <section class="content">
+      <section class="content col-md-6">
         <div class="container-fluid">
           <div class="card card-outline card-primary shadow-sm">
             <div class="card-header">
