@@ -98,6 +98,9 @@ $qTahun = mysqli_query($conn, "SELECT id_tahun, tahun_akademik FROM tbl_tahun_ak
           <!-- Small boxes (Stat box) -->
           <div class="row">
             <div class="col-lg-6">
+              <a href="../admin_periode" class="btn btn-warning btn-sm mb-3">
+                <i class="fas fa-chevron-left"></i> Kembali
+              </a>
               <!-- general form elements -->
               <div class="card card-primary">
                 <div class="card-header">
@@ -107,10 +110,6 @@ $qTahun = mysqli_query($conn, "SELECT id_tahun, tahun_akademik FROM tbl_tahun_ak
                 <!-- FORM TAMBAH PERIODE -->
                 <form action="proses.php" method="post">
                   <div class="card-body">
-
-                    <a href="../admin_periode" class="btn btn-warning btn-sm mb-3">
-                      <i class="fas fa-chevron-left"></i> Kembali
-                    </a>
 
                     <!-- NAMA PERIODE -->
                     <div class="form-group">
