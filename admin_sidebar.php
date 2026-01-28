@@ -36,6 +36,7 @@ $akademikPages = [
   'admin_prodi',
   'admin_angkatan',
   'admin_konsentrasi',
+  'admin_status',
   'admin_panduan'
 ];
 
@@ -162,6 +163,15 @@ if ($isUserManajemenOpen) {
                 class="nav-link <?= $konstruktor == 'admin_konsentrasi' ? 'active' : ''; ?>">
                 <i class="far fa-circle nav-icon"></i>
                 <p>Bidang Skripsi</p>
+              </a>
+            </li>
+
+            <!-- STATUS SKRIPSI -->
+            <li class="nav-item">
+              <a href="../admin_status"
+                class="nav-link <?= $konstruktor == 'admin_status' ? 'active' : ''; ?>">
+                <i class="far fa-circle nav-icon"></i>
+                <p>Status Skripsi</p>
               </a>
             </li>
 
