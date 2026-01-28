@@ -47,6 +47,9 @@ function decriptData($data)
     $key
   );
 }
+
+/* ================= QUERY DATA ================= */
+$query = mysqli_query($conn, "SELECT * FROM tbl_periode ORDER BY status_aktif DESC, periode DESC");
 ?>
 
 <!DOCTYPE html>
@@ -127,6 +130,7 @@ function decriptData($data)
                     <th>Periode</th>
                     <th>Tahun Akademik</th>
                     <th>Semester</th>
+                    <th>Status</th>
                     <th width="10%">Aksi</th>
                   </tr>
                 </thead>
@@ -134,33 +138,66 @@ function decriptData($data)
 
                   <?php
                   $no = 1;
-                  $qperiode = mysqli_query(
-                    $conn,
-                    "SELECT p.id_periode,p.nama_periode,p.semester,p.status_aktif,p.created_at,t.tahun_akademik
+                  $qperiode = mysqli_query($conn,"SELECT p.id_periode,p.nama_periode,p.semester,p.status_aktif,p.created_at,t.tahun_akademik
                   FROM tbl_periode p JOIN tbl_tahun_akademik t ON t.id_tahun = p.id_tahun
-                  ORDER BY p.created_at DESC"
+                  ORDER BY p.status_aktif DESC, p.created_at DESC"
                   );
 
                   if (mysqli_num_rows($qperiode) > 0):
                     while ($dt = mysqli_fetch_assoc($qperiode)):
+
                   ?>
 
                       <tr>
                         <td class="text-center"><?= $no++; ?></td>
+                        <!-- NAMA PERIODE -->
                         <td>
                           <strong><?= htmlspecialchars($dt['nama_periode']); ?></strong>
                         </td>
+                        <!-- TAHUN AKADEMIK -->
                         <td class="text-center">
                           <span class="badge badge-info">
                             <?= htmlspecialchars($dt['tahun_akademik']); ?>
                           </span>
                         </td>
+                        <!-- SEMESTER -->
                         <td class="text-center">
                           <span class="badge badge-info">
                             <?= htmlspecialchars($dt['semester']); ?>
                           </span>
                         </td>
+                        <!-- STATUS -->
                         <td class="text-center">
+                          <?php if ($dt['status_aktif'] === 'Aktif') : ?>
+                            <span class="badge badge-success">
+                              <i class="fas fa-check-circle"></i> Aktif
+                            </span>
+                          <?php else : ?>
+                            <span class="badge badge-secondary">
+                              <i class="fas fa-minus-circle"></i> Nonaktif
+                            </span>
+                          <?php endif; ?>
+                        </td>
+                        <!-- AKSI -->
+                        <td class="text-center">
+                          <!-- NONAKTIFKAN -->
+                          <?php if ($dt['status_aktif'] === 'Aktif') : ?>
+                            <a href="proses.php?action=toggle&id_periode=<?= encriptData($dt['id_periode']); ?>"
+                              class="btn btn-sm btn-danger"
+                              onclick="return confirm('Nonaktifkan tahun akademik ini?')"
+                              title="Nonaktifkan">
+                              <i class="fas fa-power-off"></i>
+                            </a>
+                          <?php else: ?>
+                            <!-- AKTIFKAN -->
+                            <a href="proses.php?action=toggle&id_periode=<?= encriptData($dt['id_periode']); ?>"
+                              class="btn btn-sm btn-success"
+                              onclick="return confirm('Aktifkan kembali tahun akademik ini? Tahun aktif lain akan dinonaktifkan')"
+                              title="Aktifkan">
+                              <i class="fas fa-check"></i>
+                            </a>
+                          <?php endif; ?>
+                          <!-- HAPUS -->
                           <a href="proses.php?action=hapus&kd_prd=<?= encriptData($dt['id_periode']); ?>"
                             class="btn btn-sm btn-outline-danger"
                             data-toggle="tooltip"
