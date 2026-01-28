@@ -53,8 +53,8 @@ $filterProgres = $_GET['progres'] ?? null;
 $whereProgres = '';
 if ($filterProgres === 'bimbingan') {
   $whereProgres = "AND LOWER(st.status) = 'bimbingan'";
-} elseif ($filterProgres === 'siap_sidang') {
-  $whereProgres = "AND LOWER(st.status) = 'siap sidang'";
+} elseif ($filterProgres === 'sidang_skripsi') {
+  $whereProgres = "AND LOWER(st.status) = 'Sidang Skripsi'";
 }
 
 /* ================= QUERY MAHASISWA ================= */
@@ -185,7 +185,7 @@ $qMhs = mysqli_query(
                           'bimbingan'         => 'warning',
                           'seminar proposal'  => 'primary',
                           'revisi'            => 'light',
-                          'siap sidang'       => 'success',
+                          'sidang skripsi'    => 'success',
                           'lulus'             => 'dark'
                         ];
                         $badge = $map[$status] ?? 'secondary';

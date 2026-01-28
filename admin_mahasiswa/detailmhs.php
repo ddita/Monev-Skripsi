@@ -149,7 +149,7 @@ $progressMap = [
   'Bimbingan' => 20,
   'Seminar Proposal' => 40,
   'Revisi'   => 60,
-  'Siap Sidang'    => 80,
+  'Sidang Skripsi'    => 80,
   'Lulus'    => 100
 ];
 $progress = $progressMap[$data['status'] ?? ''] ?? 0;
@@ -223,7 +223,7 @@ $progress = $progressMap[$data['status'] ?? ''] ?? 0;
                   elseif ($data['status'] == 'Bimbingan') $badge = 'warning';
                   elseif ($data['status'] == 'Seminar Proposal') $badge = 'info';
                   elseif ($data['status'] == 'Revisi') $badge = 'danger';
-                  elseif ($data['status'] == 'Siap Sidang') $badge = 'primary';
+                  elseif ($data['status'] == 'Sidang Skripsi') $badge = 'primary';
                   ?>
                   <span class="badge badge-<?= $badge ?>">
                     <?=

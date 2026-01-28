@@ -69,10 +69,10 @@ $qAktif = mysqli_query($conn, "SELECT COUNT(*) AS total FROM tbl_skripsi s
 ");
 $aktif = mysqli_fetch_assoc($qAktif)['total'];
 
-// SIAP SIDANG
+// Sidang Skripsi
 $qSidang = mysqli_query($conn, "SELECT COUNT(*) total FROM tbl_skripsi s
-  JOIN tbl_status st ON st.id = s.id_status WHERE LOWER(st.status) = 'siap sidang'");
-$siap_sidang = mysqli_fetch_assoc($qSidang)['total'];
+  JOIN tbl_status st ON st.id = s.id_status WHERE LOWER(st.status) = 'Sidang Skripsi'");
+$sidang_skripsi = mysqli_fetch_assoc($qSidang)['total'];
 ?>
 
 <?php
@@ -81,9 +81,9 @@ function statusBadge($status)
   $status = strtolower(trim($status));
 
   switch ($status) {
-    case 'siap sidang':
+    case 'Sidang Skripsi':
       return '<span class="badge bg-success">
-        <i class="fas fa-check-circle"></i> Siap Sidang
+        <i class="fas fa-check-circle"></i> Sidang Skripsi
       </span>';
 
     case 'seminar proposal':
@@ -318,13 +318,13 @@ $rata_hari = round($dataRata['rata_hari'] ?? 0);
               </a>
             </div>
 
-            <!-- SIAP SIDANG -->
+            <!-- Sidang Skripsi -->
             <div class="col-lg-3 col-md-6 mb-3 d-flex">
-              <a href="../admin_mahasiswa?progres=siap_sidang" class="text-white w-100">
+              <a href="../admin_mahasiswa?progres=sidang_skripsi" class="text-white w-100">
                 <div class="small-box bg-gradient-blue h-100">
                   <div class="inner">
-                    <h3><?= $siap_sidang; ?></h3>
-                    <p>Siap Sidang</p>
+                    <h3><?= $sidang_skripsi; ?></h3>
+                    <p>Sidang Skripsi</p>
                   </div>
                   <div class="icon">
                     <i class="fas fa-graduation-cap"></i>
@@ -444,7 +444,7 @@ $rata_hari = round($dataRata['rata_hari'] ?? 0);
             </div>
             <div class="card-body">
               <ul>
-                <li>Pastikan mahasiswa siap sidang segera diproses.</li>
+                <li>Pastikan mahasiswa Sidang Skripsi segera diproses.</li>
                 <li>Periksa mahasiswa tanpa progres > 14 hari.</li>
                 <li>Evaluasi beban dosen pembimbing.</li>
                 <li>Backup database secara berkala.</li>
