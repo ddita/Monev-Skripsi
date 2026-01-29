@@ -74,31 +74,50 @@ try {
     logAktivitas($conn, "Menambahkan bidang konsentrasi: $nama_bidang");
   }
 
-  /* ================== TOGGLE AKTIF / NONAKTIF ================== */ elseif ($action === 'toggle') {
+  /* ================== TOGGLE AKTIF / NONAKTIF ================== */ 
+  elseif ($action === 'toggle') {
 
-    if (!isset($_GET['id_bidang'])) {
-      throw new Exception("ID bidang tidak ditemukan");
-    }
-
-    $id = decriptData($_GET['id_bidang']);
-
-    $q = mysqli_query($conn, "SELECT status_aktif FROM tbl_bidang_skripsi WHERE id_bidang='$id'");
-
-    if (mysqli_num_rows($q) == 0) {
-      throw new Exception("Data bidang tidak ditemukan");
-    }
-
-    $row = mysqli_fetch_assoc($q);
-    $status_baru = ($row['status_aktif'] === 'Aktif')
-      ? 'Nonaktif'
-      : 'Aktif';
-
-    mysqli_query($conn, "UPDATE tbl_bidang_skripsi SET status_aktif='$status_baru' WHERE id_bidang='$id'");
-
-    logAktivitas($conn, "Mengubah status bidang ID $id menjadi $status_baru");
+  if (!isset($_GET['id_bidang'])) {
+    throw new Exception("ID bidang tidak ditemukan");
   }
 
-  /* ================== HAPUS BIDANG ================== */ elseif ($action === 'hapus') {
+  $id = decriptData($_GET['id_bidang']);
+
+  // Hitung jumlah mahasiswa aktif
+  $qCek = mysqli_query($conn, "SELECT COUNT(m.nim) AS total FROM tbl_skripsi s
+    JOIN tbl_mahasiswa m ON m.nim = s.username
+    WHERE s.id_bidang = '$id'
+      AND m.aktif = 1
+      AND s.id_status != 6
+  ");
+
+  $total = mysqli_fetch_assoc($qCek)['total'];
+
+  // Ambil status sekarang
+  $q = mysqli_query($conn, "SELECT status_aktif FROM tbl_bidang_skripsi WHERE id_bidang='$id'");
+
+  if (mysqli_num_rows($q) == 0) {
+    throw new Exception("Data bidang tidak ditemukan");
+  }
+
+  $row = mysqli_fetch_assoc($q);
+
+  // TOLAK AKTIF JIKA MASIH OVERLOAD
+  if ($row['status_aktif'] === 'Nonaktif' && $total > 4) {
+    throw new Exception("Bidang masih overload, tidak dapat diaktifkan");
+  }
+
+  $status_baru = ($row['status_aktif'] === 'Aktif')
+    ? 'Nonaktif'
+    : 'Aktif';
+
+  mysqli_query($conn, "UPDATE tbl_bidang_skripsi SET status_aktif='$status_baru' WHERE id_bidang='$id'");
+
+  logAktivitas($conn, "Mengubah status bidang ID $id menjadi $status_baru");
+}
+
+  /* ================== HAPUS BIDANG ================== */ 
+  elseif ($action === 'hapus') {
 
     if (!isset($_GET['id_bidang'])) {
       throw new Exception("ID bidang tidak ditemukan");

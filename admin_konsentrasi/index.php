@@ -45,21 +45,30 @@ function decriptData($data)
   );
 }
 
-// $qbidang = mysqli_query(
-//   $conn,
-//   "SELECT b.id_bidang,b.nama_bidang,b.status_aktif,p.nama_prodi FROM tbl_bidang_skripsi b
-// JOIN tbl_prodi p ON p.id_prodi = b.id_prodi
-// ORDER BY b.status_aktif DESC"
-// );
-$qbidang = mysqli_query($conn, "SELECT b.id_bidang, b.nama_bidang, b.status_aktif, p.nama_prodi, COUNT(m.nim) AS jumlah_mhs
-    FROM tbl_bidang_skripsi b
-    JOIN tbl_prodi p ON p.id_prodi = b.id_prodi
-    LEFT JOIN tbl_skripsi s ON s.id_bidang = b.id_bidang
-    LEFT JOIN tbl_mahasiswa m ON m.nim = s.username
-      AND m.aktif = 1
+/* ================= AUTO NONAKTIF / AKTIF BERDASARKAN BEBAN ================= */
+mysqli_query($conn, "UPDATE tbl_bidang_skripsi b LEFT JOIN (SELECT s.id_bidang, COUNT(m.nim) AS total_mhs FROM tbl_skripsi s
+    JOIN tbl_mahasiswa m ON m.nim = s.username
+    WHERE m.aktif = 1
       AND s.id_status != 6
-    GROUP BY b.id_bidang, b.nama_bidang, b.status_aktif, p.nama_prodi
-    ORDER BY b.status_aktif DESC, b.nama_bidang ASC
+    GROUP BY s.id_bidang) x ON x.id_bidang = b.id_bidang
+    SET b.status_aktif = 
+    CASE 
+      WHEN IFNULL(x.total_mhs,0) > 4 THEN 'Nonaktif'
+      ELSE 'Aktif'
+    END
+");
+
+/* ================= QUERY LIST BIDANG ================= */
+$qbidang = mysqli_query($conn, "SELECT b.id_bidang, b.nama_bidang, b.status_aktif, p.nama_prodi, COUNT(m.nim) AS jumlah_mhs
+  FROM tbl_bidang_skripsi b
+  JOIN tbl_prodi p ON p.id_prodi = b.id_prodi
+  LEFT JOIN tbl_skripsi s ON s.id_bidang = b.id_bidang
+  LEFT JOIN tbl_mahasiswa m 
+    ON m.nim = s.username
+    AND m.aktif = 1
+    AND s.id_status != 6
+  GROUP BY b.id_bidang, b.nama_bidang, b.status_aktif, p.nama_prodi
+  ORDER BY b.status_aktif DESC, b.nama_bidang ASC
 ");
 
 ?>
