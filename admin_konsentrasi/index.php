@@ -168,11 +168,11 @@ $qbidang = mysqli_query($conn, "SELECT b.id_bidang, b.nama_bidang, b.status_akti
                     <tr>
                       <td class="text-center"><?= $no++; ?></td>
 
-                      <td>
+                      <td class="text-center">
                         <strong><?= htmlspecialchars($dt['nama_prodi']); ?></strong>
                       </td>
 
-                      <td>
+                      <td class="text-center">
                         <?= htmlspecialchars($dt['nama_bidang']); ?>
                       </td>
 
