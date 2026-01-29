@@ -19,10 +19,7 @@ if ($_SESSION['role'] !== 'admin') {
 
   $ket = "Pengguna $usr ($nama) mencoba akses Master Mahasiswa sebagai $role";
 
-  mysqli_query(
-    $conn,
-    "INSERT INTO tbl_cross_auth (username, waktu, keterangan) VALUES ('$usr','$waktu','$ket')"
-  );
+  mysqli_query($conn,"INSERT INTO tbl_cross_auth (username, waktu, keterangan) VALUES ('$usr','$waktu','$ket')");
 
   header("Location: ../login/logout.php");
   exit;
@@ -167,6 +164,20 @@ if ($_SESSION['role'] !== 'admin') {
                         <!-- ================= KOLOM KANAN : DATA SKRIPSI ================= -->
                         <div class="col-md-6">
                           <h5 class="text-muted">Data Skripsi</h5>
+
+                          <div class="form-group">
+                            <label>Bidang Skripsi</label>
+                            <select name="id_bidang" class="form-control" required>
+                              <option value="" selected disabled>--- Pilih Bidang Skripsi ---</option>
+                              <?php
+                              $q = mysqli_query($conn, "SELECT id_bidang, nama_bidang FROM tbl_bidang_skripsi ORDER BY nama_bidang ASC");
+                              while ($b = mysqli_fetch_assoc($q)) {
+                                echo "<option value='{$b['id_bidang']}'>{$b['nama_bidang']}</option>";
+                              }
+                              ?>
+                            </select>
+                          </div>
+
                           <div class="form-group">
                             <label>Judul Skripsi</label>
                             <textarea name="judul" class="form-control" rows="4" required></textarea>

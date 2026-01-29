@@ -44,6 +44,7 @@ try {
     $angkatan   = $_POST['angkatan'];
     $id_status  = (int) $_POST['id_status'];
     $nip_dosen  = $_POST['nip_dosen'];
+    $id_bidang  = (int) $_POST['id_bidang'];
     $judul      = trim($_POST['judul']);
     $id_periode = (int) $_POST['id_periode'];
 
@@ -59,11 +60,8 @@ try {
     mysqli_stmt_close($cek);
 
     // Insert mahasiswa
-    $stmt = mysqli_prepare(
-      $conn,
-      "INSERT INTO tbl_mahasiswa (nim,nama,prodi,angkatan,status_skripsi,dosen_pembimbing,aktif,created_at,updated_at,id_periode)
-    VALUES (?,?,?,?,?,?,1,NOW(),NOW(),?)"
-    );
+    $stmt = mysqli_prepare($conn, "INSERT INTO tbl_mahasiswa (nim,nama,prodi,angkatan,id_status,dosen_pembimbing,aktif,created_at,updated_at,id_periode)
+        VALUES (?,?,?,?,?,?,1,NOW(),NOW(),?)");
 
     mysqli_stmt_bind_param(
       $stmt,
@@ -92,10 +90,11 @@ try {
     mysqli_stmt_close($stmt);
 
     // Insert skripsi
-    $stmt = mysqli_prepare($conn, "INSERT INTO tbl_skripsi (id_user,username,judul,id_status,id_periode,created_at,updated_at)
-    VALUES (?,?,?,?,?,NOW(),NOW())");
+    $stmt = mysqli_prepare($conn, "INSERT INTO tbl_skripsi (id_user,username,judul,id_status,id_periode,id_bidang,created_at,updated_at)
+        VALUES (?,?,?,?,?,?,NOW(),NOW())");
 
-    mysqli_stmt_bind_param($stmt,"issii",$id_user,$nim,$judul,$id_status,$id_periode);
+    mysqli_stmt_bind_param($stmt, "issiii", $id_user, $nim, $judul, $id_status, $id_periode, $id_bidang);
+
     mysqli_stmt_execute($stmt);
     mysqli_stmt_close($stmt);
 
@@ -110,20 +109,22 @@ try {
     $id_status        = (int) $_POST['id_status'];
     $id_periode       = (int) $_POST['id_periode'];
     $dosen_pembimbing = $_POST['nip_dosen'];
+    $id_bidang        = (int) $_POST['id_bidang'];
     $judul            = trim($_POST['judul']);
     $aktif            = (int) $_POST['aktif'];
 
     /* ================= UPDATE TBL_MAHASISWA ================= */
     $stmt = mysqli_prepare($conn, "UPDATE tbl_mahasiswa SET prodi=?,angkatan=?,id_status=?,dosen_pembimbing=?,id_periode=?,aktif=?,updated_at=NOW()WHERE nim=?");
 
-    mysqli_stmt_bind_param($stmt,"ssisiis",$prodi,$angkatan,$id_status,$dosen_pembimbing,$id_periode,$aktif,$nim);
+    mysqli_stmt_bind_param($stmt, "ssisiis", $prodi, $angkatan, $id_status, $dosen_pembimbing, $id_periode, $aktif, $nim);
     mysqli_stmt_execute($stmt);
     mysqli_stmt_close($stmt);
 
     /* ================= UPDATE TBL_SKRIPSI ================= */
-    $stmt = mysqli_prepare($conn,"UPDATE tbl_skripsi SET judul=?,id_status=?,id_periode=?,updated_at=NOW()WHERE username=?");
+    $stmt = mysqli_prepare($conn, "UPDATE tbl_skripsi SET judul=?, id_status=?, id_periode=?, id_bidang=?, updated_at=NOW() WHERE username=?");
 
-    mysqli_stmt_bind_param($stmt,"siis",$judul,$id_status,$id_periode,$nim);
+    mysqli_stmt_bind_param($stmt, "siiis", $judul, $id_status, $id_periode, $id_bidang, $nim);
+
     mysqli_stmt_execute($stmt);
     mysqli_stmt_close($stmt);
 
@@ -152,7 +153,7 @@ try {
     $row = mysqli_fetch_assoc($q);
     $aktif_sekarang = (int)$row['aktif'];
 
-    // 🔄 Toggle status
+    // Toggle status
     if ($aktif_sekarang === 1) {
       $aktif_baru  = 0;
       $status_user = 'nonaktif';
@@ -163,17 +164,11 @@ try {
       $log = "Mengaktifkan kembali mahasiswa $nim";
     }
 
-    // 🔹 Update tbl_mahasiswa
-    $q1 = mysqli_query(
-      $conn,
-      "UPDATE tbl_mahasiswa SET aktif='$aktif_baru' WHERE nim='$nim'"
-    );
+    // Update tbl_mahasiswa
+    $q1 = mysqli_query($conn, "UPDATE tbl_mahasiswa SET aktif='$aktif_baru' WHERE nim='$nim'");
 
-    // 🔹 Update tbl_users
-    $q2 = mysqli_query(
-      $conn,
-      "UPDATE tbl_users SET status='$status_user' WHERE username='$nim'"
-    );
+    // Update tbl_users
+    $q2 = mysqli_query($conn, "UPDATE tbl_users SET status='$status_user' WHERE username='$nim'");
 
     if (!$q1 || !$q2) {
       throw new Exception(mysqli_error($conn));
@@ -182,9 +177,7 @@ try {
     logAktivitas($conn, $log);
   }
 
-  /* =====================================================
-     🗑️ HAPUS MAHASISWA
-  ===================================================== */ elseif ($action === 'hapus') {
+  /* ================== HAPUS MAHASISWA ================== */ elseif ($action === 'hapus') {
 
     $nim = decriptData($_GET['nim']);
 

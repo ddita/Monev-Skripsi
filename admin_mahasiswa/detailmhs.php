@@ -60,78 +60,19 @@ if (empty($nim)) {
         </div>";
   exit;
 }
-$q = mysqli_query($conn, "
-  SELECT 
-    m.nim,
-    m.nama,
-    m.aktif,
-    p.nama_prodi,
-    a.keterangan AS angkatan,
-    d.nama_dosen AS pembimbing,
 
-    s.id_skripsi,
-    s.judul,
-    s.created_at,
-    s.updated_at,
-
-    st.status,
-
-    pr.nama_periode,
-    pr.semester,
-
-    ta.tahun_akademik
-
-  FROM tbl_mahasiswa m
-
-  LEFT JOIN tbl_prodi p 
-    ON m.prodi = p.kode_prodi
-
-  LEFT JOIN tbl_angkatan a 
-    ON m.angkatan = a.kode_angkatan
-
-  LEFT JOIN tbl_dosen d 
-    ON m.dosen_pembimbing = d.nip
-
-  LEFT JOIN tbl_skripsi s 
-    ON m.nim = s.username
-
-  LEFT JOIN tbl_status st 
-    ON m.id_status = st.id
-
-  LEFT JOIN tbl_periode pr 
-    ON m.id_periode = pr.id_periode
-
-  LEFT JOIN tbl_tahun_akademik ta 
-    ON pr.id_tahun = ta.id_tahun
-
-  WHERE m.nim = '$nim'
+$q = mysqli_query($conn, "SELECT m.nim, m.nama, m.aktif, p.nama_prodi, a.keterangan AS angkatan, d.nama_dosen AS pembimbing, s.id_skripsi, s.judul,
+    s.created_at, s.updated_at, st.status, pr.nama_periode, pr.semester, ta.tahun_akademik, b.nama_bidang FROM tbl_mahasiswa m
+    LEFT JOIN tbl_prodi p ON m.prodi = p.kode_prodi
+    LEFT JOIN tbl_angkatan a ON m.angkatan = a.kode_angkatan
+    LEFT JOIN tbl_dosen d ON m.dosen_pembimbing = d.nip
+    LEFT JOIN tbl_skripsi s ON m.nim = s.username
+    LEFT JOIN tbl_status st ON m.id_status = st.id
+    LEFT JOIN tbl_periode pr ON m.id_periode = pr.id_periode
+    LEFT JOIN tbl_tahun_akademik ta ON pr.id_tahun = ta.id_tahun
+    LEFT JOIN tbl_bidang_skripsi b ON s.id_bidang = b.id_bidang
+    WHERE m.nim = '$nim'
 ") or die(mysqli_error($conn));
-
-// $q = mysqli_query($conn, "SELECT 
-//     m.nim,
-//     m.nama,
-//     m.aktif,
-//     p.nama_prodi,
-//     a.keterangan AS angkatan,
-//     d.nama_dosen AS pembimbing,
-//     s.id_skripsi,
-//     s.judul,
-//     s.created_at,
-//     s.updated_at,
-//     st.status,
-//     pr.nama_periode,
-//     pr.tahun_akademik,
-//     pr.semester
-//   FROM tbl_mahasiswa m
-//   LEFT JOIN tbl_prodi p ON m.prodi = p.kode_prodi
-//   LEFT JOIN tbl_angkatan a ON m.angkatan = a.kode_angkatan
-//   LEFT JOIN tbl_dosen d ON m.dosen_pembimbing = d.nip
-//   LEFT JOIN tbl_skripsi s ON m.nim = s.username
-//   LEFT JOIN tbl_status st ON s.status_skripsi = st.id
-//   LEFT JOIN tbl_periode pr ON s.id_periode = pr.id_periode
-//   WHERE m.nim = '$nim'
-// ") or die(mysqli_error($conn));
-
 
 if (mysqli_num_rows($q) == 0) {
   echo "<div style='padding:20px'>
@@ -275,10 +216,9 @@ $progress = $progressMap[$data['status'] ?? ''] ?? 0;
                 </div>
                 <div class="card-body">
                   <p><strong>Judul:</strong><br><?= $data['judul'] ?? '-'; ?></p>
-                  <p><strong>Periode:</strong> <?= $data['nama_periode'] ?? '-'; ?></p>
-                  <p><strong>Tahun Akademik:</strong>
-                    <?= $data['tahun_akademik']; ?> (<?= $data['semester']; ?>)
-                  </p>
+                  <p><strong>Bidang Skripsi:</strong><?= $data['nama_bidang'] ?? '-' ?></p>
+                  <p><strong>Periode:</strong><?= $data['nama_periode'] ?? '-'; ?></p>
+                  <p><strong>Tahun Akademik:</strong><?= $data['tahun_akademik']; ?> (<?= $data['semester']; ?>)</p>
                   <p><strong>Tanggal Pengajuan:</strong>
                     <?= isset($data['created_at'])
                       ? date('d-m-Y', strtotime($data['created_at']))

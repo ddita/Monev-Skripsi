@@ -19,10 +19,7 @@ if ($_SESSION['role'] !== 'admin') {
 
   $ket = "Pengguna $usr ($nama) mencoba akses Manajemen Mahasiswa sebagai $role";
 
-  mysqli_query(
-    $conn,
-    "INSERT INTO tbl_cross_auth (username, waktu, keterangan) VALUES ('$usr','$waktu','$ket')"
-  );
+  mysqli_query($conn, "INSERT INTO tbl_cross_auth (username, waktu, keterangan) VALUES ('$usr','$waktu','$ket')");
 
   header("Location: ../login/logout.php");
   exit;
@@ -58,16 +55,28 @@ if ($filterProgres === 'bimbingan') {
 }
 
 /* ================= QUERY MAHASISWA ================= */
-$qMhs = mysqli_query(
-  $conn,
-  "SELECT m.nim, m.nama, sk.judul, a.keterangan AS angkatan, COALESCE(st.status, 'Draft') AS status_skripsi, d.nama_dosen, m.aktif FROM tbl_mahasiswa m
+// $qMhs = mysqli_query(
+//   $conn,
+//   "SELECT m.nim, m.nama, sk.judul, a.keterangan AS angkatan, COALESCE(st.status, 'Draft') AS status_skripsi, d.nama_dosen, m.aktif
+//     FROM tbl_mahasiswa m
+//     LEFT JOIN tbl_skripsi sk ON sk.username = m.nim
+//     LEFT JOIN tbl_status st ON st.id = sk.id_status
+//     LEFT JOIN tbl_angkatan a ON m.angkatan = a.kode_angkatan
+//     LEFT JOIN tbl_dosen d ON m.dosen_pembimbing = d.nip
+//     WHERE 1=1 $whereProgres
+//     ORDER BY m.nama ASC"
+// ) or die(mysqli_error($conn));
+$qMhs = mysqli_query($conn,"SELECT m.nim,m.nama,b.nama_bidang,a.keterangan AS angkatan,COALESCE(st.status, 'Draft') AS status_skripsi,d.nama_dosen,m.aktif
+    FROM tbl_mahasiswa m
     LEFT JOIN tbl_skripsi sk ON sk.username = m.nim
+    LEFT JOIN tbl_bidang_skripsi b ON b.id_bidang = sk.id_bidang
     LEFT JOIN tbl_status st ON st.id = sk.id_status
     LEFT JOIN tbl_angkatan a ON m.angkatan = a.kode_angkatan
     LEFT JOIN tbl_dosen d ON m.dosen_pembimbing = d.nip
     WHERE 1=1 $whereProgres
     ORDER BY m.nama ASC"
 ) or die(mysqli_error($conn));
+
 ?>
 
 <!DOCTYPE html>
@@ -150,8 +159,7 @@ $qMhs = mysqli_query(
                     <th>No</th>
                     <th>NIM</th>
                     <th>Nama</th>
-                    <th>Judul Skripsi</th>
-                    <th>Angkatan</th>
+                    <th>Bidang Skripsi</th>
                     <th>Progres</th>
                     <th>Dosen</th>
                     <th>Status</th>
@@ -164,19 +172,18 @@ $qMhs = mysqli_query(
                   while ($m = mysqli_fetch_assoc($qMhs)) { ?>
                     <tr class="<?= $m['aktif'] == 0 ? 'row-nonaktif' : '' ?>">
                       <td class="text-center"><?= $no++; ?></td>
-                      <td><b><?= $m['nim']; ?></b></td>
-                      <td>
+                      <td class="text-center"><b><?= $m['nim']; ?></b></td>
+                      <td class="text-center">
                         <?= htmlspecialchars($m['nama']); ?>
                         <?php if ($m['aktif'] == 0): ?>
                           <small class="text-muted">(nonaktif)</small>
                         <?php endif; ?>
                       </td>
-                      <td>
-                        <?= $m['judul']
-                          ? htmlspecialchars(mb_strimwidth($m['judul'], 0, 50, '...'))
-                          : '<span class="text-muted">Belum ada judul</span>'; ?>
+                      <td class="text-center">
+                        <?= $m['nama_bidang']
+                          ? htmlspecialchars($m['nama_bidang'])
+                          : '<span class="text-muted">Belum ditentukan</span>'; ?>
                       </td>
-                      <td class="text-center"><?= $m['angkatan']; ?></td>
                       <td class="text-center">
                         <?php
                         $status = strtolower(trim($m['status_skripsi']));
@@ -194,9 +201,16 @@ $qMhs = mysqli_query(
                           <?= ucfirst($m['status_skripsi']); ?>
                         </span>
                       </td>
-                      <td><?= $m['nama_dosen'] ?? '-'; ?></td>
+                      <td class="text-center"><?= $m['nama_dosen'] ?? '-'; ?></td>
                       <td class="text-center">
-                        <?= $m['aktif'] ? '<span class="badge badge-success">Aktif</span>' : '<span class="badge badge-secondary">Nonaktif</span>'; ?>
+                        <?= $m['aktif']
+                          ? '<span class="badge badge-success">
+                            <i class="fas fa-check-circle"></i> Aktif
+                          </span>'
+                          : '<span class="badge badge-secondary">
+                            <i class="fas fa-minus-circle"></i> Nonaktif
+                          </span>';
+                        ?>
                       </td>
                       <td class="text-center">
                         <!-- EDIT DATA -->
@@ -217,7 +231,7 @@ $qMhs = mysqli_query(
                             class="btn btn-sm btn-danger"
                             onclick="return confirm('Nonaktifkan mahasiswa ini?')"
                             title="Nonaktifkan">
-                            <i class="fas fa-user-slash"></i>
+                            <i class="fas fa-power-off"></i>
                           </a>
                         <?php else: ?>
                           <!-- AKTIFKAN -->
@@ -225,7 +239,7 @@ $qMhs = mysqli_query(
                             class="btn btn-sm btn-success"
                             onclick="return confirm('Aktifkan kembali mahasiswa ini?')"
                             title="Aktifkan">
-                            <i class="fas fa-user-check"></i>
+                            <i class="fas fa-check"></i>
                           </a>
                         <?php endif; ?>
 

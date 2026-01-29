@@ -34,7 +34,7 @@ if (!isset($_GET['nim'])) {
 $nim = decriptData($_GET['nim']);
 
 /* ================= DATA MAHASISWA ================= */
-$qMhs = mysqli_query($conn,"SELECT m.*,s.judul,s.id_status FROM tbl_mahasiswa m LEFT JOIN tbl_skripsi s ON s.username = m.nim WHERE m.nim='$nim'");
+$qMhs = mysqli_query($conn, "SELECT m.*, s.judul, s.id_status, s.id_bidang FROM tbl_mahasiswa m LEFT JOIN tbl_skripsi s ON s.username = m.nim WHERE m.nim='$nim'");
 $mhs = mysqli_fetch_assoc($qMhs);
 
 if (!$mhs) {
@@ -194,6 +194,20 @@ if (!$mhs) {
                                             <div class="col-md-6">
                                                 <h5 class="text-muted">Data Mahasiswa</h5>
                                                 <hr>
+                                                <div class="form-group">
+                                                    <!-- BIDANG SKRIPSI -->
+                                                    <label>Bidang Skripsi</label>
+                                                    <select name="id_bidang" class="form-control" required>
+                                                        <?php
+                                                        $qBidang = mysqli_query($conn, "SELECT * FROM tbl_bidang_skripsi ORDER BY nama_bidang");
+                                                        while ($b = mysqli_fetch_assoc($qBidang)) {
+                                                            $sel = ($b['id_bidang'] == $mhs['id_bidang']) ? 'selected' : '';
+                                                            echo "<option value='{$b['id_bidang']}' $sel>{$b['nama_bidang']}</option>";
+                                                        }
+                                                        ?>
+                                                    </select>
+                                                </div>
+                                                <!-- JUDUL SKRIPSI -->
                                                 <div class="form-group">
                                                     <label>Judul Skripsi</label>
                                                     <input type="text" name="judul" class="form-control"
