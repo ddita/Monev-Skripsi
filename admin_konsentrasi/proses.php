@@ -61,7 +61,7 @@ try {
     mysqli_stmt_close($cek);
 
     // Insert
-    $stmt = mysqli_prepare($conn,"INSERT INTO tbl_bidang_skripsi (id_prodi, nama_bidang, status_aktif, created_at) VALUES (?, ?, 'Aktif', NOW())");
+    $stmt = mysqli_prepare($conn,"INSERT INTO tbl_bidang_skripsi (id_prodi, nama_bidang, status_aktif) VALUES (?, ?, 'Aktif')");
 
     if (!$stmt) {
       throw new Exception("Prepare gagal: " . mysqli_error($conn));

@@ -19,10 +19,7 @@ if ($_SESSION['role'] !== 'admin') {
 
   $ket = "Pengguna $usr ($nama) mencoba akses Manajemen Akademik sebagai $role";
 
-  mysqli_query(
-    $conn,
-    "INSERT INTO tbl_cross_auth (username, waktu, keterangan) VALUES ('$usr','$waktu','$ket')"
-  );
+  mysqli_query($conn, "INSERT INTO tbl_cross_auth (username, waktu, keterangan) VALUES ('$usr','$waktu','$ket')");
 
   header("Location: ../login/logout.php");
   exit;
@@ -48,8 +45,23 @@ function decriptData($data)
   );
 }
 
-/* ================= QUERY DATA ================= */
-// $query = mysqli_query($conn, "SELECT * FROM tbl_bidang_skripsi ORDER BY status_aktif DESC, periode DESC");
+// $qbidang = mysqli_query(
+//   $conn,
+//   "SELECT b.id_bidang,b.nama_bidang,b.status_aktif,p.nama_prodi FROM tbl_bidang_skripsi b
+// JOIN tbl_prodi p ON p.id_prodi = b.id_prodi
+// ORDER BY b.status_aktif DESC"
+// );
+$qbidang = mysqli_query($conn, "SELECT b.id_bidang, b.nama_bidang, b.status_aktif, p.nama_prodi, COUNT(m.nim) AS jumlah_mhs
+    FROM tbl_bidang_skripsi b
+    JOIN tbl_prodi p ON p.id_prodi = b.id_prodi
+    LEFT JOIN tbl_skripsi s ON s.id_bidang = b.id_bidang
+    LEFT JOIN tbl_mahasiswa m ON m.nim = s.username
+      AND m.aktif = 1
+      AND s.id_status != 6
+    GROUP BY b.id_bidang, b.nama_bidang, b.status_aktif, p.nama_prodi
+    ORDER BY b.status_aktif DESC, b.nama_bidang ASC
+");
+
 ?>
 
 <!DOCTYPE html>
@@ -129,90 +141,94 @@ function decriptData($data)
                     <th width="5%">No</th>
                     <th>Program Studi</th>
                     <th>Nama Bidang</th>
+                    <th>Jumlah Mahasiswa</th>
+                    <th>Status Beban</th>
                     <th>Status</th>
-                    <th width="10%">Aksi</th>
+                    <th width="12%">Aksi</th>
                   </tr>
                 </thead>
                 <tbody>
-
                   <?php
                   $no = 1;
-                  $qbidang = mysqli_query(
-                    $conn,
-                    "SELECT b.id_bidang,b.nama_bidang,b.status_aktif,p.nama_prodi FROM tbl_bidang_skripsi b
-                  JOIN tbl_prodi p ON p.id_prodi = b.id_prodi
-                  ORDER BY b.status_aktif DESC"
-                  );
+                  while ($dt = mysqli_fetch_assoc($qbidang)) {
 
-                  if (mysqli_num_rows($qbidang) > 0):
-                    while ($dt = mysqli_fetch_assoc($qbidang)):
+                    $jml = (int) $dt['jumlah_mhs'];
 
+                    if ($jml > 4) {
+                      $badgeBeban = 'danger';
+                      $labelBeban = 'Overload';
+                    } elseif ($jml >= 3) {
+                      $badgeBeban = 'warning';
+                      $labelBeban = 'Padat';
+                    } else {
+                      $badgeBeban = 'success';
+                      $labelBeban = 'Normal';
+                    }
                   ?>
-
-                      <tr>
-                        <td class="text-center"><?= $no++; ?></td>
-                        <!-- PRODI -->
-                        <td>
-                          <strong><?= htmlspecialchars($dt['nama_prodi']); ?></strong>
-                        </td>
-                        <!-- NAMA BIDANG -->
-                        <td>
-                          <strong><?= htmlspecialchars($dt['nama_bidang']); ?></strong>
-                        </td>
-                        <!-- STATUS -->
-                        <td class="text-center">
-                          <?php if ($dt['status_aktif'] === 'Aktif') : ?>
-                            <span class="badge badge-success">
-                              <i class="fas fa-check-circle"></i> Aktif
-                            </span>
-                          <?php else : ?>
-                            <span class="badge badge-secondary">
-                              <i class="fas fa-minus-circle"></i> Nonaktif
-                            </span>
-                          <?php endif; ?>
-                        </td>
-                        <!-- AKSI -->
-                        <td class="text-center">
-                          <!-- NONAKTIFKAN -->
-                          <?php if ($dt['status_aktif'] === 'Aktif') : ?>
-                            <a href="proses.php?action=toggle&id_bidang=<?= encriptData($dt['id_bidang']); ?>"
-                              class="btn btn-sm btn-danger"
-                              onclick="return confirm('Nonaktifkan tahun akademik ini?')"
-                              title="Nonaktifkan">
-                              <i class="fas fa-power-off"></i>
-                            </a>
-                          <?php else: ?>
-                            <!-- AKTIFKAN -->
-                            <a href="proses.php?action=toggle&id_bidang=<?= encriptData($dt['id_bidang']); ?>"
-                              class="btn btn-sm btn-success"
-                              onclick="return confirm('Aktifkan kembali tahun akademik ini? Tahun aktif lain akan dinonaktifkan')"
-                              title="Aktifkan">
-                              <i class="fas fa-check"></i>
-                            </a>
-                          <?php endif; ?>
-                          <!-- HAPUS -->
-                          <a href="proses.php?action=hapus&id_bidang=<?= encriptData($dt['id_bidang']); ?>"
-                            class="btn btn-sm btn-outline-danger"
-                            data-toggle="tooltip"
-                            title="Hapus data"
-                            onclick="return confirm('Hapus bidang <?= $dt['nama_bidang']; ?> ?')">
-                            <i class="fas fa-trash"></i>
-                          </a>
-                        </td>
-                      </tr>
-
-                    <?php endwhile;
-                  else: ?>
-
                     <tr>
-                      <td colspan="5" class="text-center text-muted py-4">
-                        <i class="fas fa-info-circle"></i>
-                        Belum ada data periode akademik
+                      <td class="text-center"><?= $no++; ?></td>
+
+                      <td>
+                        <strong><?= htmlspecialchars($dt['nama_prodi']); ?></strong>
+                      </td>
+
+                      <td>
+                        <?= htmlspecialchars($dt['nama_bidang']); ?>
+                      </td>
+
+                      <td class="text-center">
+                        <?= $jml ?>
+                      </td>
+
+                      <td class="text-center">
+                        <span class="badge badge-<?= $badgeBeban ?>">
+                          <?= $labelBeban ?>
+                        </span>
+                      </td>
+
+                      <td class="text-center">
+                        <?php if ($dt['status_aktif'] === 'Aktif'): ?>
+                          <span class="badge badge-success">
+                            <i class="fas fa-check-circle"></i> Aktif
+                          </span>
+                        <?php else: ?>
+                          <span class="badge badge-secondary">
+                            <i class="fas fa-minus-circle"></i> Nonaktif
+                          </span>
+                        <?php endif; ?>
+                      </td>
+
+                      <td class="text-center">
+                        <?php if ($dt['status_aktif'] === 'Aktif'): ?>
+                          <a href="proses.php?action=toggle&id_bidang=<?= encriptData($dt['id_bidang']); ?>"
+                            class="btn btn-sm btn-danger"
+                            onclick="return confirm('Nonaktifkan bidang ini?')">
+                            <i class="fas fa-power-off"></i>
+                          </a>
+                        <?php else: ?>
+                          <a href="proses.php?action=toggle&id_bidang=<?= encriptData($dt['id_bidang']); ?>"
+                            class="btn btn-sm btn-success"
+                            onclick="return confirm('Aktifkan kembali bidang ini?')">
+                            <i class="fas fa-check"></i>
+                          </a>
+                        <?php endif; ?>
+
+                        <a href="proses.php?action=hapus&id_bidang=<?= encriptData($dt['id_bidang']); ?>"
+                          class="btn btn-sm btn-outline-danger"
+                          onclick="return confirm('Hapus bidang <?= $dt['nama_bidang']; ?> ?')">
+                          <i class="fas fa-trash"></i>
+                        </a>
                       </td>
                     </tr>
+                  <?php } ?>
 
+                  <?php if (mysqli_num_rows($qbidang) == 0): ?>
+                    <tr>
+                      <td colspan="7" class="text-center text-muted">
+                        Data bidang skripsi belum tersedia
+                      </td>
+                    </tr>
                   <?php endif; ?>
-
                 </tbody>
               </table>
 
