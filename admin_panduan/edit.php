@@ -142,7 +142,7 @@ if (!$data) {
                     <button type="submit" name="action" value="edit" class="btn btn-warning">
                       <i class="fas fa-save"></i> Update
                     </button>
-                    <a href="index.php" class="btn btn-secondary">Kembali</a>
+                    <a href="../admin_panduan" class="btn btn-secondary">Kembali</a>
                   </div>
                 </form>
               </div>

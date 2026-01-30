@@ -126,7 +126,7 @@ if ($_SESSION['role'] !== 'admin') {
                       <button type="submit" name="action" value="tambah" class="btn btn-primary">
                         <i class="fas fa-save"></i> Simpan
                       </button>
-                      <a href="index.php" class="btn btn-secondary">Kembali</a>
+                      <a href="../admin_panduan" class="btn btn-secondary">Kembali</a>
                     </div>
                   </form>
                 </div>

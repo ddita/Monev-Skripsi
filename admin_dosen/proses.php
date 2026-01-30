@@ -111,7 +111,7 @@ try {
             mysqli_commit($conn);
 
             logAktivitas($conn, "Update data dosen NIP $nip");
-            header("Location: index.php?status=success");
+            header("Location: ../admin_dosen?status=success");
             exit;
         } catch (Exception $e) {
             mysqli_rollback($conn);
