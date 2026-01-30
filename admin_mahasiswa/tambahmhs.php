@@ -31,7 +31,7 @@ if ($_SESSION['role'] !== 'admin') {
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Monev Skripsi | Administrator</title>
+    <title>Monev Skripsi | Tambah Mahasiswa</title>
     <?php include '../mhs_listlink.php'; ?>
     <script>
       (function() {

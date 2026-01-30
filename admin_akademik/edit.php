@@ -49,7 +49,7 @@ if (!$tahun) {
 
 <head>
   <meta charset="utf-8">
-  <title>Edit Tahun Akademik</title>
+  <title>Monev Skripsi | Edit Tahun Akademik</title>
   <?php include '../mhs_listlink.php'; ?>
   <script>
     (function() {

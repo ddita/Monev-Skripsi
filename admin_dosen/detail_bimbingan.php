@@ -75,7 +75,7 @@ $qMhs = mysqli_query($conn, "SELECT m.nim, m.nama, m.prodi, s.judul FROM tbl_mah
 
 <head>
   <meta charset="utf-8">
-  <title>Detail Bimbingan Dosen</title>
+  <title>Monev Skripsi | Detail Bimbingan Dosen</title>
   <?php include '../mhs_listlink.php'; ?>
   <script>
     (function() {

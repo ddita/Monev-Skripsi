@@ -31,7 +31,7 @@ if ($_SESSION['role'] !== 'admin') {
 
   <head>
     <meta charset="utf-8">
-    <title>Tambah Dosen</title>
+    <title>Monev Skripsi | Tambah Dosen</title>
     <?php include '../mhs_listlink.php'; ?>
     <script>
       (function() {

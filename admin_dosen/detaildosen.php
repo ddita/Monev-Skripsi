@@ -92,7 +92,7 @@ $qMhs = mysqli_query($conn, "SELECT m.nim,m.nama,m.prodi,m.angkatan,s.judul,
 
 <head>
   <meta charset="UTF-8">
-  <title>Detail Dosen</title>
+  <title>Monev Skripsi | Detail Dosen</title>
   <script>
     (function() {
       const theme = localStorage.getItem("theme") || "dark";

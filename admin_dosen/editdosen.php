@@ -65,7 +65,7 @@ if ($beban > 8) {
 
 <head>
     <meta charset="utf-8">
-    <title>Edit Dosen</title>
+    <title>Monev Skripsi | Edit Dosen</title>
     <?php include '../mhs_listlink.php'; ?>
     <script>
         (function() {
