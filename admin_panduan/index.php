@@ -139,7 +139,7 @@ $query = mysqli_query($conn, "SELECT * FROM tbl_panduan_skripsi ORDER BY uploade
                         <td><strong><?= htmlspecialchars($dt['judul']); ?></strong></td>
                         <td class="text-center"><?= htmlspecialchars($dt['tahun_akademik']); ?></td>
                         <td class="text-center">
-                          <a href="../uploads/panduan/<?= htmlspecialchars($dt['file']); ?>"
+                          <a href="../upload<?= htmlspecialchars($dt['file']); ?>"
                             target="_blank"
                             class="btn btn-sm btn-info">
                             <i class="fas fa-download"></i> Unduh
