@@ -73,7 +73,7 @@ $query = mysqli_query($conn, "SELECT * FROM tbl_periode ORDER BY status_aktif DE
 
     <!-- PRELOADER -->
     <div class="preloader flex-column justify-content-center align-items-center">
-      <img src="../images/UP.png" height="60">
+      <img class="animation__shake" src="../images/UP.png" alt="Monev-Skripsi" height="60" width="60">
     </div>
 
     <?php include '../mhs_navbar.php'; ?>
