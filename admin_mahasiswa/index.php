@@ -163,7 +163,7 @@ $qMhs = mysqli_query($conn,"SELECT m.nim,m.nama,b.nama_bidang,a.keterangan AS an
                     <th>Progres</th>
                     <th>Dosen</th>
                     <th>Status</th>
-                    <th>Aksi</th>
+                    <th width="15%">Aksi</th>
                   </tr>
                 </thead>
 
